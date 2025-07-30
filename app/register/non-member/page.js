@@ -69,7 +69,7 @@ export default function IEEERegisterForm() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                
+
                     <div>
                         <label className="font-semibold ">Ticket Type:</label>
                         <select name="ticket_type" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2" required>
@@ -81,7 +81,7 @@ export default function IEEERegisterForm() {
 
                 <div>
                     <label className="font-semibold ">Track Selection:</label><br />
-                    <select name="track" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2 mt-4" required>
+                    <select name="track" onChange={handleChange} className="input-field w-full bg-black border-2 p-3 rounded-2xl m-2 mt-4" required>
                         <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
                         <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
                     </select>
@@ -104,7 +104,7 @@ export default function IEEERegisterForm() {
                 <input name="bank_name" placeholder="Which bank did you transfer the payment from?" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2" required />
                 <input name="account_name" placeholder="Name registered with your bank account" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2" required /><br />
                 <label className="block font-bold mt-4">Proof of Payment:</label>
-                <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field border-2 p-3 rounded-2xl cursor-pointer" required />
+                <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field w-full border-2 p-3 rounded-2xl cursor-pointer" required />
 
                 <p className="text-sm ">
                     By registering, you agree to our{" "}
@@ -150,6 +150,42 @@ export default function IEEERegisterForm() {
                             </p>
 
                             <hr className="my-3" />
+
+                            <p><strong>بشرائك تذكرة لحضور مؤتمر MedRoots 2025، فإنك توافق على الشروط والأحكام التالية:</strong></p>
+                            <p>
+                                1️⃣ شراء التذكرة … <br />
+                                • تتيح كل تذكرة دخول فرد واحد إلى المؤتمر في التواريخ والمكان المحددين.<br />
+                                • يجب إبراز التذكرة (ورقية أو إلكترونية) عند الدخول.<br />
+                                • يحق للمنظمين التحقق من هوية حامل التذكرة.<br /><br />
+
+                                2️⃣ سياسة عدم الاسترجاع … <br />
+                                • جميع مبيعات التذاكر نهائية.<br />
+                                • لا يحق استرداد المبلغ أو استبدال التذكرة أو نقلها لأي سبب.<br /><br />
+
+                                3️⃣ إلغاء أو تأجيل الفعالية … <br />
+                                • في حال تم إلغاء المؤتمر، قد يتم النظر في خيارات استرداد المبلغ وفق تقدير المنظمين.<br />
+                                • في حال تأجيل المؤتمر، ستبقى التذكرة صالحة للتاريخ الجديد، ولن يتم إصدار أي استرداد.<br /><br />
+
+                                4️⃣ التغييرات على البرنامج … <br />
+                                • يحق للمنظمين تعديل جدول الفعالية أو المتحدثين أو الجلسات دون إشعار مسبق.<br />
+                                • لا يحق استرداد المبلغ بسبب تغييرات البرنامج.<br /><br />
+
+                                5️⃣ مدونة السلوك … <br />
+                                • يجب على الحضور التصرف بشكل مهني ومحترم.<br />
+                                • يحق للمنظمين إزالة أي شخص يسيء التصرف دون استرداد المبلغ.<br /><br />
+
+                                6️⃣ التصوير والإعلام … <br />
+                                • حضور المؤتمر يعني الموافقة الضمنية على التصوير أو تسجيل الفيديو لأغراض ترويجية.<br /><br />
+
+                                7️⃣ حدود المسؤولية … <br />
+                                • لا يتحمل المنظمون أي مسؤولية عن الإصابات الشخصية أو فقدان أو تلف الممتلكات.<br /><br />
+
+                                8️⃣ عدم قابلية النقل … <br />
+                                • التذاكر غير قابلة للتحويل إلا بعد موافقة المنظمين المسبقة.<br /><br />
+
+                                9️⃣ الإقرار بالشروط … <br />
+                                • شراء التذكرة يعني موافقتك على جميع الشروط والأحكام المذكورة أعلاه.
+                            </p>
 
 
                         </div>

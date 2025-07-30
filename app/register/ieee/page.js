@@ -54,25 +54,25 @@ export default function IEEERegisterForm() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-black text-white rounded-2xl shadow-2xl p-8 space-y-5"
+        className="w-full max-w-xl bg-black text-white rounded-2xl shadow-2xl p-8 space-y-5 "
       >
         <h1 className="text-3xl font-extrabold text-center ">
           IEEE Member Registration
         </h1>
         <p className="text-center ">Register now for MedRoots 2025</p>
 
-        <div className="space-y-3">
-          <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="input-field" required />
-          <input name="email" placeholder="Email Address" onChange={handleChange} className="input-field" required />
-          <input name="phone" placeholder="Phone Number" onChange={handleChange} className="input-field" required />
-          <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="input-field" required />
-          <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="input-field" required />
+        <div className="space-y-10 space-x-8 gap-5">
+          <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
+          <input name="email" placeholder="Email Address" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
+          <input name="phone" placeholder="Phone Number" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
+          <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
+          <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="font-semibold ">Membership Status:</label>
-            <select name="membership_status" onChange={handleChange} className="input-field bg-black" required>
+            <select name="membership_status" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2" required>
               <option value="student">Student Member</option>
               <option value="professional">Professional Member</option>
               <option value="life">Life Member</option>
@@ -80,7 +80,7 @@ export default function IEEERegisterForm() {
           </div>
           <div>
             <label className="font-semibold ">Ticket Type:</label>
-            <select name="ticket_type" onChange={handleChange} className="input-field bg-black" required>
+            <select name="ticket_type" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2" required>
               <option value="standard_ieee">Standard IEEE Ticket</option>
               <option value="vip_ieee">VIP IEEE Ticket</option>
             </select>
@@ -88,18 +88,18 @@ export default function IEEERegisterForm() {
         </div>
 
         <div>
-          <label className="font-semibold ">Track Selection:</label>
-          <select name="track" onChange={handleChange} className="input-field bg-black" required>
+          <label className="font-semibold ">Track Selection:</label><br/>
+          <select name="track" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2 mt-4" required>
             <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
             <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
           </select>
         </div>
 
-        <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="input-field" />
+        <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2 mb-4" />
 
         <div>
-          <label className="font-semibold ">How did you hear about the conference?</label>
-          <select name="hear_about" onChange={handleChange} className="input-field bg-black">
+          <label className="font-semibold ">How did you hear about the conference?</label><br/>
+          <select name="hear_about" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2 mt-4">
             <option value="social">Social Media</option>
             <option value="university">University</option>
             <option value="email">Email</option>
@@ -109,22 +109,22 @@ export default function IEEERegisterForm() {
         </div>
 
         <h3 className="text-lg font-semibold mt-4">💳 Payment Information</h3>
-        <input name="bank_name" placeholder="Which bank did you transfer the payment from?" onChange={handleChange} className="input-field" required />
-        <input name="account_name" placeholder="Name registered with your bank account" onChange={handleChange} className="input-field" required />
-        <label className="block text-gray-700">Proof of Payment:</label>
-        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field" required />
+        <input name="bank_name" placeholder="Which bank did you transfer the payment from?" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2" required />
+        <input name="account_name" placeholder="Name registered with your bank account" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2" required /><br/>
+        <label className="block font-bold mt-4">Proof of Payment:</label>
+        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field border-2 p-3 rounded-2xl cursor-pointer" required />
 
-        <p className="text-sm text-gray-600">
+        <p className="text-sm ">
           By registering, you agree to our{" "}
           <button type="button" onClick={() => setShowTerms(true)} className="text-blue-500 underline">
             Terms & Conditions
           </button>
         </p>
 
-        <label className="flex items-center gap-2 text-gray-700">
+        <label className="flex items-center gap-2">
           <input type="checkbox" name="agree_terms" onChange={handleChange} required /> I agree to the Terms & Conditions
         </label>
-        <label className="flex items-center gap-2 text-gray-700">
+        <label className="flex items-center gap-2 ">
           <input type="checkbox" name="agree_media" onChange={handleChange} required /> I consent to photography/media use
         </label>
 

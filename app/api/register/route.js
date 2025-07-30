@@ -24,6 +24,8 @@ export async function POST(req) {
       bank_name,
       account_name,
       payment_proof,
+      agree_terms = false,
+      agree_media = false,
     } = body;
 
     const { error } = await supabase.from("registrations").insert([
@@ -41,6 +43,8 @@ export async function POST(req) {
         bank_name,
         account_name,
         payment_proof,
+        agree_terms,
+        agree_media,
       },
     ]);
 

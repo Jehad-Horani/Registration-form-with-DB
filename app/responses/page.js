@@ -5,50 +5,78 @@ import { saveAs } from "file-saver";
 
 export default function ResponsesPage() {
   const [data, setData] = useState([]);
+  const [password, setPassword] = useState("");
+  const [authorized, setAuthorized] = useState(false);
 
+  // ✅ عند تحميل الصفحة، إذا في باسورد محفوظ ندخل مباشرة
   useEffect(() => {
-    const fetchResponses = async () => {
-      const res = await fetch("/api/get-responses");
-      const result = await res.json();
-      setData(result);
-    };
-    fetchResponses();
+    const savedPass = localStorage.getItem("responses_auth");
+    if (savedPass === "JehadMedRootsTT25") {
+      setAuthorized(true);
+    }
   }, []);
 
-  // ✅ توليد ملف Word لإجابة واحدة
-  const generateDocForRow = (row) => {
-    return [
-      new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
-      new Paragraph(" "),
-      new Paragraph(new TextRun({ text: `Full Name: ${row.full_name}`, bold: true })),
-      new Paragraph(`Email: ${row.email}`),
-      new Paragraph(`Phone: ${row.phone}`),
-      new Paragraph(`Institution: ${row.institution || "-"}`),
-      new Paragraph(`IEEE Number: ${row.ieee_number || "-"}`),
-      new Paragraph(`Membership Status: ${row.membership_status || "-"}`),
-      new Paragraph(`Ticket Type: ${row.ticket_type}`),
-      new Paragraph(`Track: ${row.track}`),
-      new Paragraph(`Dietary: ${row.dietary || "-"}`),
-      new Paragraph(`Heard About: ${row.hear_about}`),
-      new Paragraph(`Bank Name: ${row.bank_name || "-"}`),
-      new Paragraph(`Account Name: ${row.account_name || "-"}`),
-      new Paragraph(`Payment Proof URL: ${row.payment_proof || "-"}`),
-      new Paragraph(`Date: ${new Date(row.created_at).toLocaleDateString()}`),
-      new Paragraph(" "),
-      new Paragraph("--------------------------------------------------"),
-      new Paragraph(" "),
-    ];
+  // ✅ إذا الباسورد صحيح، نخزنه في LocalStorage
+  const checkPassword = () => {
+    if (password === "JehadMedRootsTT25") {
+      localStorage.setItem("responses_auth", "JehadMedRootsTT25");
+      setAuthorized(true);
+    } else {
+      alert("❌ كلمة السر غير صحيحة");
+    }
   };
+
+  // ✅ تحميل البيانات فقط بعد تسجيل الدخول
+  useEffect(() => {
+    if (authorized) {
+      const fetchResponses = async () => {
+        const res = await fetch("/api/get-responses");
+        const result = await res.json();
+
+        // ✅ ترتيب الإجابات حسب تاريخ الإنشاء وإضافة ID تسلسلي
+        const sorted = result.sort(
+          (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+        const numbered = sorted.map((item, index) => ({
+          ...item,
+          serial_id: index + 1,
+        }));
+        setData(numbered);
+      };
+      fetchResponses();
+    }
+  }, [authorized]);
+
+  // ✅ توليد ملف Word لإجابة واحدة
+  const generateDocForRow = (row) => [
+    new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
+    new Paragraph(" "),
+    new Paragraph(new TextRun({ text: `Registration ID: ${row.serial_id}`, bold: true })),
+    new Paragraph(new TextRun({ text: `Full Name: ${row.full_name}`, bold: true })),
+    new Paragraph(`Email: ${row.email}`),
+    new Paragraph(`Phone: ${row.phone}`),
+    new Paragraph(`Institution: ${row.institution || "-"}`),
+    new Paragraph(`IEEE Number: ${row.ieee_number || "-"}`),
+    new Paragraph(`Membership Status: ${row.membership_status || "-"}`),
+    new Paragraph(`Ticket Type: ${row.ticket_type}`),
+    new Paragraph(`Track: ${row.track}`),
+    new Paragraph(`Dietary: ${row.dietary || "-"}`),
+    new Paragraph(`Heard About: ${row.hear_about}`),
+    new Paragraph(`Bank Name: ${row.bank_name || "-"}`),
+    new Paragraph(`Account Name: ${row.account_name || "-"}`),
+    new Paragraph(`Payment Proof URL: ${row.payment_proof || "-"}`),
+    new Paragraph(`Date: ${new Date(row.created_at).toLocaleDateString()}`),
+    new Paragraph(" "),
+    new Paragraph("--------------------------------------------------"),
+    new Paragraph(" "),
+  ];
 
   // ✅ تحميل إجابة واحدة
   const downloadWord = (row) => {
     const doc = new Document({
       sections: [{ children: generateDocForRow(row) }],
     });
-
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, `${row.full_name}.docx`);
-    });
+    Packer.toBlob(doc).then((blob) => saveAs(blob, `${row.full_name}.docx`));
   };
 
   // ✅ تحميل جميع الإجابات
@@ -57,16 +85,11 @@ export default function ResponsesPage() {
       alert("❌ لا توجد إجابات للتنزيل");
       return;
     }
-
     const allSections = data.flatMap((row) => generateDocForRow(row));
-
     const doc = new Document({
       sections: [{ children: allSections }],
     });
-
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, "All_Registrations.docx");
-    });
+    Packer.toBlob(doc).then((blob) => saveAs(blob, "All_Registrations.docx"));
   };
 
   // ✅ حذف الإجابة
@@ -76,7 +99,6 @@ export default function ResponsesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-
     const result = await res.json();
     if (result.success) {
       setData((prev) => prev.filter((item) => item.id !== id));
@@ -93,11 +115,33 @@ export default function ResponsesPage() {
     { key: "vip_ieee", title: "🌟 VIP IEEE Members", color: "bg-purple-100" },
   ];
 
+  // ✅ شاشة كلمة السر
+  if (!authorized) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+        <h1 className="text-2xl mb-4">🔒 Enter Password to Access Responses</h1>
+        <input
+          type="password"
+          placeholder="Enter Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="px-4 py-2 rounded text-black mb-3"
+        />
+        <button
+          onClick={checkPassword}
+          className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Login
+        </button>
+      </div>
+    );
+  }
+
+  // ✅ صفحة الإجابات
   return (
     <div className="p-6 max-w-7xl mx-auto text-black">
       <h1 className="text-3xl font-bold mb-6 text-center text-white">📋 All Registrations</h1>
 
-      {/* زر تحميل جميع الإجابات */}
       <div className="text-center mb-6">
         <button
           onClick={downloadAllWord}
@@ -120,6 +164,7 @@ export default function ResponsesPage() {
                 <table className="w-full border-collapse border border-gray-300 text-sm">
                   <thead className="bg-gray-200">
                     <tr>
+                      <th className="border p-2">#</th>
                       <th className="border p-2">Full Name</th>
                       <th className="border p-2">Email</th>
                       <th className="border p-2">Phone</th>
@@ -137,6 +182,7 @@ export default function ResponsesPage() {
                   <tbody>
                     {filtered.map((r) => (
                       <tr key={r.id} className="text-center">
+                        <td className="border p-2">{r.serial_id}</td>
                         <td className="border p-2">{r.full_name}</td>
                         <td className="border p-2">{r.email}</td>
                         <td className="border p-2">{r.phone}</td>

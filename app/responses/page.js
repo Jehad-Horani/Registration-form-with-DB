@@ -4,70 +4,45 @@ import { useEffect, useState } from "react";
 export default function ResponsesPage() {
   const [data, setData] = useState([]);
 
-  // 📌 جلب البيانات
-  const fetchResponses = async () => {
-    const res = await fetch("/api/get-responses");
-    const result = await res.json();
-    setData(result);
-  };
-
   useEffect(() => {
+    const fetchResponses = async () => {
+      const res = await fetch("/api/get-responses");
+      const result = await res.json();
+      setData(result);
+    };
     fetchResponses();
   }, []);
 
-  // 📌 حذف الإجابة
-  const handleDelete = async (id) => {
-    if (!confirm("هل أنت متأكد من حذف هذه الإجابة؟")) return;
+  // 🔹 دالة تحميل CSV لصف واحد
+  const downloadCSV = (row) => {
+    const headers = Object.keys(row).join(",");
+    const values = Object.values(row).join(",");
+    const csv = `${headers}\n${values}`;
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
 
-    const res = await fetch(`/api/delete-response?id=${id}`, { method: "DELETE" });
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${row.full_name}.csv`;
+    a.click();
+  };
+
+  // 🔹 حذف الإجابة
+  const deleteResponse = async (id) => {
+    const res = await fetch("/api/delete-response", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+
     const result = await res.json();
 
     if (result.success) {
-      alert("✅ تم حذف الإجابة");
-      fetchResponses();
+      alert("✅ تم الحذف بنجاح");
+      setData((prev) => prev.filter((item) => item.id !== id));
     } else {
       alert("❌ خطأ: " + result.error);
     }
-  };
-
-  // 📌 تحميل CSV لصف واحد
-  const handleDownloadCSV = (row) => {
-    const headers = [
-      "Full Name",
-      "Email",
-      "Phone",
-      "Institution",
-      "IEEE #",
-      "Membership",
-      "Track",
-      "Dietary",
-      "Heard About",
-      "Date",
-    ];
-
-    const values = [
-      row.full_name,
-      row.email,
-      row.phone,
-      row.institution || "-",
-      row.ieee_number || "-",
-      row.membership_status,
-      row.track,
-      row.dietary || "-",
-      row.hear_about,
-      new Date(row.created_at).toLocaleDateString(),
-    ];
-
-    const csvContent =
-      headers.join(",") + "\n" + values.map((v) => `"${v}"`).join(",");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${row.full_name}_registration.csv`;
-    link.click();
   };
 
   const sections = [
@@ -79,7 +54,7 @@ export default function ResponsesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto text-black">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white">📋 All Registrations</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">📋 All Registrations</h1>
 
       {sections.map((sec) => {
         const filtered = data.filter((d) => d.ticket_type === sec.key);
@@ -122,18 +97,18 @@ export default function ResponsesPage() {
                         <td className="border p-2">
                           {new Date(r.created_at).toLocaleDateString()}
                         </td>
-                        <td className="border p-2 flex gap-2 justify-center">
+                        <td className="border p-2 space-x-2">
                           <button
-                            onClick={() => handleDelete(r.id)}
+                            onClick={() => deleteResponse(r.id)}
                             className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                           >
-                            🗑 Delete
+                            Delete
                           </button>
                           <button
-                            onClick={() => handleDownloadCSV(r)}
+                            onClick={() => downloadCSV(r)}
                             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                           >
-                            ⬇ CSV
+                            CSV
                           </button>
                         </td>
                       </tr>

@@ -54,12 +54,12 @@ export default function IEEERegisterForm() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 space-y-5"
+        className="w-full max-w-lg bg-black text-white rounded-2xl shadow-2xl p-8 space-y-5"
       >
-        <h1 className="text-3xl font-extrabold text-center text-gray-900">
+        <h1 className="text-3xl font-extrabold text-center ">
           IEEE Member Registration
         </h1>
-        <p className="text-center text-gray-500">Register now for MedRoots 2025</p>
+        <p className="text-center ">Register now for MedRoots 2025</p>
 
         <div className="space-y-3">
           <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="input-field" required />
@@ -71,16 +71,16 @@ export default function IEEERegisterForm() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="font-semibold text-gray-700">Membership Status:</label>
-            <select name="membership_status" onChange={handleChange} className="input-field" required>
+            <label className="font-semibold ">Membership Status:</label>
+            <select name="membership_status" onChange={handleChange} className="input-field bg-black" required>
               <option value="student">Student Member</option>
               <option value="professional">Professional Member</option>
               <option value="life">Life Member</option>
             </select>
           </div>
           <div>
-            <label className="font-semibold text-gray-700">Ticket Type:</label>
-            <select name="ticket_type" onChange={handleChange} className="input-field" required>
+            <label className="font-semibold ">Ticket Type:</label>
+            <select name="ticket_type" onChange={handleChange} className="input-field bg-black" required>
               <option value="standard_ieee">Standard IEEE Ticket</option>
               <option value="vip_ieee">VIP IEEE Ticket</option>
             </select>
@@ -88,8 +88,8 @@ export default function IEEERegisterForm() {
         </div>
 
         <div>
-          <label className="font-semibold text-gray-700">Track Selection:</label>
-          <select name="track" onChange={handleChange} className="input-field" required>
+          <label className="font-semibold ">Track Selection:</label>
+          <select name="track" onChange={handleChange} className="input-field bg-black" required>
             <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
             <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
           </select>
@@ -98,8 +98,8 @@ export default function IEEERegisterForm() {
         <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="input-field" />
 
         <div>
-          <label className="font-semibold text-gray-700">How did you hear about the conference?</label>
-          <select name="hear_about" onChange={handleChange} className="input-field">
+          <label className="font-semibold ">How did you hear about the conference?</label>
+          <select name="hear_about" onChange={handleChange} className="input-field bg-black">
             <option value="social">Social Media</option>
             <option value="university">University</option>
             <option value="email">Email</option>
@@ -108,7 +108,7 @@ export default function IEEERegisterForm() {
           </select>
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-800 mt-4">💳 Payment Information</h3>
+        <h3 className="text-lg font-semibold mt-4">💳 Payment Information</h3>
         <input name="bank_name" placeholder="Which bank did you transfer the payment from?" onChange={handleChange} className="input-field" required />
         <input name="account_name" placeholder="Name registered with your bank account" onChange={handleChange} className="input-field" required />
         <label className="block text-gray-700">Proof of Payment:</label>
@@ -139,14 +139,27 @@ export default function IEEERegisterForm() {
             <h2 className="text-2xl font-bold mb-4">📜 Terms & Conditions | الشروط والأحكام</h2>
             <div className="space-y-4 text-gray-800 text-sm leading-relaxed">
               <p><strong>By purchasing a ticket to MedRoots 2025, you agree to the following terms and conditions:</strong></p>
-              <p>1️⃣ Ticket Purchase …  2️⃣ No Refund Policy …  3️⃣ Event Cancellation …  4️⃣ Changes to Program …  5️⃣ Code of Conduct …  6️⃣ Photography …  7️⃣ Limitation of Liability …  8️⃣ Transferability …  9️⃣ Acceptance of Terms …</p>
+              <p>1️⃣ Ticket Purchase … <br/>•	Each ticket grants one individual access to the conference on the specified dates and venue.
+•	Tickets must be presented (physically or digitally) upon entry.
+•	The organizer reserves the right to verify the identity of the ticket holder.
+<br/><br/>  2️⃣ No Refund Policy … <br/>•	All ticket sales are final.
+•	No refunds, exchanges, or transfers will be issued for any reason.
+<br/><br/>  3️⃣ Event Cancellation … <br/>•	If the event is cancelled, refund options may be considered at the organizer’s discretion.
+•	If the event is postponed, tickets will remain valid for the new date. No refunds will be issued.
+<br/><br/> 4️⃣ Changes to Program …<br/>•	The event schedule, speakers, and sessions are subject to change without prior notice.
+•	No refunds will be issued due to program changes.
+<br/><br/>  5️⃣ Code of Conduct … <br/>•	Attendees must behave professionally and respectfully.
+•	Organizers reserve the right to remove individuals for misconduct, without refund.
+<br/><br/> 6️⃣ Photography …<br/>•	Attendance implies consent to photography/video recording for promotional purposes.
+<br/><br/>  7️⃣ Limitation of Liability … <br/>•	Organizers are not liable for personal injury, loss, or damage to property.
+<br/><br/> 8️⃣ Transferability … <br/>•	Tickets are non-transferable unless approved by the organizers in advance.
+<br/><br/> 9️⃣ Acceptance of Terms …<br/>•	Purchasing a ticket implies agreement with all terms and conditions above.
+
+</p>
 
               <hr className="my-3" />
 
-              <p className="text-right">
-                <strong>الشروط والأحكام:</strong> بشرائك تذكرة لحضور مؤتمر MedRoots 2025 فإنك توافق على التالي…  
-                ١️⃣ شراء التذكرة …  ٢️⃣ سياسة عدم الاسترجاع …  ٣️⃣ إلغاء أو تأجيل المؤتمر …  ٤️⃣ تعديلات على البرنامج …  ٥️⃣ مدونة السلوك …  ٦️⃣ التصوير والإعلام …  ٧️⃣ حدود المسؤولية …  ٨️⃣ عدم قابلية النقل …  ٩️⃣ الإقرار بالشروط …
-              </p>
+              
             </div>
 
             <button

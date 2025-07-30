@@ -34,7 +34,7 @@ export default function NonMemberRegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 space-y-4 bg-white shadow-lg rounded-xl">
+    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 space-y-4 bg-black shadow-lg rounded-xl">
       <h2 className="text-2xl font-bold text-center">Non-Member Registration</h2>
 
       <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="border p-2 w-full" required />

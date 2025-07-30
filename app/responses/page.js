@@ -12,16 +12,21 @@ export default function ResponsesPage() {
   useEffect(() => {
     const savedData = localStorage.getItem("responses_auth");
     if (savedData) {
-      const { pass, timestamp } = JSON.parse(savedData);
-      const now = Date.now();
+      try {
+        const { pass, timestamp } = JSON.parse(savedData); // ✅ JSON.parse بشكل آمن
+        const now = Date.now();
 
-      if (pass === "JehadMedRootsTT25" && now - timestamp < 2 * 60 * 60 * 1000) {
-        setAuthorized(true);
-      } else {
-        localStorage.removeItem("responses_auth");
+        if (pass === "JehadMedRootsTT25" && now - timestamp < 2 * 60 * 60 * 1000) {
+          setAuthorized(true);
+        } else {
+          localStorage.removeItem("responses_auth");
+        }
+      } catch (err) {
+        localStorage.removeItem("responses_auth"); // ❌ لو التخزين قديم أو مش JSON
       }
     }
   }, []);
+
 
   // ✅ تسجيل الدخول وتخزين الباسورد مع الوقت
   const checkPassword = () => {
@@ -30,12 +35,13 @@ export default function ResponsesPage() {
         pass: "JehadMedRootsTT25",
         timestamp: Date.now(),
       };
-      localStorage.setItem("responses_auth", JSON.stringify(data));
+      localStorage.setItem("responses_auth", JSON.stringify(data)); // ✅ JSON.stringify
       setAuthorized(true);
     } else {
       alert("❌ كلمة السر غير صحيحة");
     }
   };
+
 
   // ✅ زر تسجيل الخروج
   const logout = () => {

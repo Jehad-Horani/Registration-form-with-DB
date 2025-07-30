@@ -21,7 +21,7 @@ export default function ResponsesPage() {
   ];
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto text-black">
       <h1 className="text-3xl font-bold mb-6 text-center">📋 All Registrations</h1>
 
       {sections.map((sec) => {

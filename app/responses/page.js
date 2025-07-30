@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import { saveAs } from "file-saver";
 
 export default function ResponsesPage() {
   const [data, setData] = useState([]);
@@ -13,21 +15,61 @@ export default function ResponsesPage() {
     fetchResponses();
   }, []);
 
-  // 🔹 دالة تحميل CSV لصف واحد
-  const downloadCSV = (row) => {
-    const headers = Object.keys(row).join(",");
-    const values = Object.values(row).join(",");
-    const csv = `${headers}\n${values}`;
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${row.full_name}.csv`;
-    a.click();
+  // ✅ توليد ملف Word لإجابة واحدة
+  const generateDocForRow = (row) => {
+    return [
+      new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
+      new Paragraph(" "),
+      new Paragraph(new TextRun({ text: `Full Name: ${row.full_name}`, bold: true })),
+      new Paragraph(`Email: ${row.email}`),
+      new Paragraph(`Phone: ${row.phone}`),
+      new Paragraph(`Institution: ${row.institution || "-"}`),
+      new Paragraph(`IEEE Number: ${row.ieee_number || "-"}`),
+      new Paragraph(`Membership Status: ${row.membership_status || "-"}`),
+      new Paragraph(`Ticket Type: ${row.ticket_type}`),
+      new Paragraph(`Track: ${row.track}`),
+      new Paragraph(`Dietary: ${row.dietary || "-"}`),
+      new Paragraph(`Heard About: ${row.hear_about}`),
+      new Paragraph(`Bank Name: ${row.bank_name || "-"}`),
+      new Paragraph(`Account Name: ${row.account_name || "-"}`),
+      new Paragraph(`Payment Proof URL: ${row.payment_proof || "-"}`),
+      new Paragraph(`Date: ${new Date(row.created_at).toLocaleDateString()}`),
+      new Paragraph(" "),
+      new Paragraph("--------------------------------------------------"),
+      new Paragraph(" "),
+    ];
   };
 
-  // 🔹 حذف الإجابة
+  // ✅ تحميل إجابة واحدة
+  const downloadWord = (row) => {
+    const doc = new Document({
+      sections: [{ children: generateDocForRow(row) }],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${row.full_name}.docx`);
+    });
+  };
+
+  // ✅ تحميل جميع الإجابات
+  const downloadAllWord = () => {
+    if (data.length === 0) {
+      alert("❌ لا توجد إجابات للتنزيل");
+      return;
+    }
+
+    const allSections = data.flatMap((row) => generateDocForRow(row));
+
+    const doc = new Document({
+      sections: [{ children: allSections }],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, "All_Registrations.docx");
+    });
+  };
+
+  // ✅ حذف الإجابة
   const deleteResponse = async (id) => {
     const res = await fetch("/api/delete-response", {
       method: "DELETE",
@@ -36,10 +78,9 @@ export default function ResponsesPage() {
     });
 
     const result = await res.json();
-
     if (result.success) {
-      alert("✅ تم الحذف بنجاح");
       setData((prev) => prev.filter((item) => item.id !== id));
+      alert("✅ تم حذف الإجابة");
     } else {
       alert("❌ خطأ: " + result.error);
     }
@@ -54,7 +95,17 @@ export default function ResponsesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto text-black">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white">📋 All Registrations</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">📋 All Registrations</h1>
+
+      {/* زر تحميل جميع الإجابات */}
+      <div className="text-center mb-6">
+        <button
+          onClick={downloadAllWord}
+          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+        >
+          ⬇️ Download All as Word
+        </button>
+      </div>
 
       {sections.map((sec) => {
         const filtered = data.filter((d) => d.ticket_type === sec.key);
@@ -76,8 +127,9 @@ export default function ResponsesPage() {
                       <th className="border p-2">IEEE #</th>
                       <th className="border p-2">Membership</th>
                       <th className="border p-2">Track</th>
-                      <th className="border p-2">Dietary</th>
-                      <th className="border p-2">Heard About</th>
+                      <th className="border p-2">Bank</th>
+                      <th className="border p-2">Account Name</th>
+                      <th className="border p-2">Payment Proof</th>
                       <th className="border p-2">Date</th>
                       <th className="border p-2">Actions</th>
                     </tr>
@@ -90,10 +142,23 @@ export default function ResponsesPage() {
                         <td className="border p-2">{r.phone}</td>
                         <td className="border p-2">{r.institution || "-"}</td>
                         <td className="border p-2">{r.ieee_number || "-"}</td>
-                        <td className="border p-2">{r.membership_status}</td>
+                        <td className="border p-2">{r.membership_status || "-"}</td>
                         <td className="border p-2">{r.track}</td>
-                        <td className="border p-2">{r.dietary || "-"}</td>
-                        <td className="border p-2">{r.hear_about}</td>
+                        <td className="border p-2">{r.bank_name || "-"}</td>
+                        <td className="border p-2">{r.account_name || "-"}</td>
+                        <td className="border p-2">
+                          {r.payment_proof ? (
+                            <a
+                              href={r.payment_proof}
+                              target="_blank"
+                              className="text-blue-600 underline"
+                            >
+                              View
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
                         <td className="border p-2">
                           {new Date(r.created_at).toLocaleDateString()}
                         </td>
@@ -105,10 +170,10 @@ export default function ResponsesPage() {
                             Delete
                           </button>
                           <button
-                            onClick={() => downloadCSV(r)}
+                            onClick={() => downloadWord(r)}
                             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                           >
-                            CSV
+                            Word
                           </button>
                         </td>
                       </tr>

@@ -44,20 +44,20 @@ export default function IEEERegisterForm() {
       <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="border p-2 w-full" />
 
       <label className="block font-semibold">Membership Status:</label>
-      <select name="membership_status" onChange={handleChange} className="border p-2 w-full">
+      <select name="membership_status" onChange={handleChange} className="border p-2 w-full bg-black">
         <option value="student">Student Member</option>
         <option value="professional">Professional Member</option>
         <option value="life">Life Member</option>
       </select>
 
       <label className="block font-semibold">Ticket Type:</label>
-      <select name="ticket_type" onChange={handleChange} className="border p-2 w-full">
+      <select name="ticket_type" onChange={handleChange} className="border p-2 w-full  bg-black">
         <option value="standard_ieee">Standard IEEE Member Ticket</option>
         <option value="vip_ieee">VIP IEEE Member Ticket</option>
       </select>
 
       <label className="block font-semibold">Track Selection:</label>
-      <select name="track" onChange={handleChange} className="border p-2 w-full">
+      <select name="track" onChange={handleChange} className="border p-2 w-full  bg-black">
         <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
         <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
       </select>
@@ -65,7 +65,7 @@ export default function IEEERegisterForm() {
       <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="border p-2 w-full" />
 
       <label className="block font-semibold">How did you hear about the conference?</label>
-      <select name="hear_about" onChange={handleChange} className="border p-2 w-full">
+      <select name="hear_about" onChange={handleChange} className="border p-2 w-full  bg-black">
         <option value="social">Social Media</option>
         <option value="university">University</option>
         <option value="email">Email</option>

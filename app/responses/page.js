@@ -9,12 +9,7 @@ export default function ResponsesPage() {
   const [authorized, setAuthorized] = useState(false);
 
   // ✅ عند تحميل الصفحة، إذا في باسورد محفوظ ندخل مباشرة
-  useEffect(() => {
-    const savedPass = localStorage.getItem("responses_auth");
-    if (savedPass === "JehadMedRootsTT25") {
-      setAuthorized(true);
-    }
-  }, []);
+
 
   // ✅ إذا الباسورد صحيح، نخزنه في LocalStorage
   const checkPassword = () => {

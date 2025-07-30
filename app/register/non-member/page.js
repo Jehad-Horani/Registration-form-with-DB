@@ -51,13 +51,33 @@ export default function NonMemberRegisterForm() {
     <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 space-y-4 bg-white shadow-lg rounded-xl">
       <h2 className="text-2xl font-bold text-center">Non-Member Registration</h2>
 
-      {/* الحقول الأساسية */}
-      <input name="full_name" placeholder="Full Name" onChange={handleChange} className="border p-2 w-full" required />
+         <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="border p-2 w-full" required />
       <input name="email" placeholder="Email Address" onChange={handleChange} className="border p-2 w-full" required />
       <input name="phone" placeholder="Phone Number" onChange={handleChange} className="border p-2 w-full" required />
-      <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="border p-2 w-full" />
+      <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="border p-2 w-full" required/>
 
-      {/* ... بقية الفورم القديم */}
+      <label className="block font-semibold" required>Ticket Type:</label>
+      <select name="ticket_type" onChange={handleChange} className="border p-2 w-full bg-black">
+        <option value="standard">Standard Ticket</option>
+        <option value="vip">VIP Ticket</option>
+      </select>
+
+      <label className="block font-semibold" required>Track Selection:</label>
+      <select name="track" onChange={handleChange} className="border p-2 w-full  bg-black">
+        <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
+        <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
+      </select>
+
+      <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="border p-2 w-full" />
+
+      <label className="block font-semibold">How did you hear about the conference?</label>
+      <select name="hear_about" onChange={handleChange} className="border p-2 w-full  bg-black" required>
+        <option value="social">Social Media</option>
+        <option value="university">University</option>
+        <option value="email">Email</option>
+        <option value="colleague">Colleague</option>
+        <option value="other">Other</option>
+      </select>
 
       {/* قسم الدفع */}
       <h3 className="text-lg font-semibold mt-4">💳 Payment Information</h3>

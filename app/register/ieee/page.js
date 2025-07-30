@@ -136,7 +136,7 @@ export default function IEEERegisterForm() {
       {showTerms && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
           <div className="bg-white max-w-3xl w-full p-6 rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-bold mb-4">📜 Terms & Conditions | الشروط والأحكام</h2>
+            <h2 className="text-2xl font-bold text-black mb-4">📜 Terms & Conditions | الشروط والأحكام</h2>
             <div className="space-y-4 text-gray-800 text-sm leading-relaxed">
               <p><strong>By purchasing a ticket to MedRoots 2025, you agree to the following terms and conditions:</strong></p>
               <p>1️⃣ Ticket Purchase … <br/>•	Each ticket grants one individual access to the conference on the specified dates and venue.

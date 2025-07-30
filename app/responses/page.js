@@ -95,7 +95,7 @@ export default function ResponsesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto text-black">
-      <h1 className="text-3xl font-bold mb-6 text-center">📋 All Registrations</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">📋 All Registrations</h1>
 
       {/* زر تحميل جميع الإجابات */}
       <div className="text-center mb-6">

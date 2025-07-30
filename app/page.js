@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black p-6">
       <h1 className="text-3xl font-bold mb-6">🎟 Conference Registration</h1>
 
       <div className="space-y-4 w-full max-w-md">

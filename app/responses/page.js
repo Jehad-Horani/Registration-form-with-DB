@@ -8,27 +8,49 @@ export default function ResponsesPage() {
   const [password, setPassword] = useState("");
   const [authorized, setAuthorized] = useState(false);
 
-  // ✅ عند تحميل الصفحة، إذا في باسورد محفوظ ندخل مباشرة
+  // ✅ التحقق من الباسورد وتاريخ التخزين
+  useEffect(() => {
+    const savedData = localStorage.getItem("responses_auth");
+    if (savedData) {
+      const { pass, timestamp } = JSON.parse(savedData);
+      const now = Date.now();
 
+      if (pass === "JehadMedRootsTT25" && now - timestamp < 2 * 60 * 60 * 1000) {
+        setAuthorized(true);
+      } else {
+        localStorage.removeItem("responses_auth");
+      }
+    }
+  }, []);
 
-  // ✅ إذا الباسورد صحيح، نخزنه في LocalStorage
+  // ✅ تسجيل الدخول وتخزين الباسورد مع الوقت
   const checkPassword = () => {
     if (password === "JehadMedRootsTT25") {
-      localStorage.setItem("responses_auth", "JehadMedRootsTT25");
+      const data = {
+        pass: "JehadMedRootsTT25",
+        timestamp: Date.now(),
+      };
+      localStorage.setItem("responses_auth", JSON.stringify(data));
       setAuthorized(true);
     } else {
       alert("❌ كلمة السر غير صحيحة");
     }
   };
 
-  // ✅ تحميل البيانات فقط بعد تسجيل الدخول
+  // ✅ زر تسجيل الخروج
+  const logout = () => {
+    localStorage.removeItem("responses_auth");
+    setAuthorized(false);
+    setPassword("");
+  };
+
+  // ✅ تحميل البيانات بعد تسجيل الدخول
   useEffect(() => {
     if (authorized) {
       const fetchResponses = async () => {
         const res = await fetch("/api/get-responses");
         const result = await res.json();
 
-        // ✅ ترتيب الإجابات حسب تاريخ الإنشاء وإضافة ID تسلسلي
         const sorted = result.sort(
           (a, b) => new Date(a.created_at) - new Date(b.created_at)
         );
@@ -42,7 +64,7 @@ export default function ResponsesPage() {
     }
   }, [authorized]);
 
-  // ✅ توليد ملف Word لإجابة واحدة
+  // ✅ باقي الدوال (تحميل Word وحذف الإجابات)
   const generateDocForRow = (row) => [
     new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
     new Paragraph(" "),
@@ -66,7 +88,6 @@ export default function ResponsesPage() {
     new Paragraph(" "),
   ];
 
-  // ✅ تحميل إجابة واحدة
   const downloadWord = (row) => {
     const doc = new Document({
       sections: [{ children: generateDocForRow(row) }],
@@ -74,7 +95,6 @@ export default function ResponsesPage() {
     Packer.toBlob(doc).then((blob) => saveAs(blob, `${row.full_name}.docx`));
   };
 
-  // ✅ تحميل جميع الإجابات
   const downloadAllWord = () => {
     if (data.length === 0) {
       alert("❌ لا توجد إجابات للتنزيل");
@@ -87,7 +107,6 @@ export default function ResponsesPage() {
     Packer.toBlob(doc).then((blob) => saveAs(blob, "All_Registrations.docx"));
   };
 
-  // ✅ حذف الإجابة
   const deleteResponse = async (id) => {
     const res = await fetch("/api/delete-response", {
       method: "DELETE",
@@ -110,7 +129,7 @@ export default function ResponsesPage() {
     { key: "vip_ieee", title: "🌟 VIP IEEE Members", color: "bg-purple-100" },
   ];
 
-  // ✅ شاشة كلمة السر
+  // ✅ شاشة إدخال كلمة السر
   if (!authorized) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -120,7 +139,7 @@ export default function ResponsesPage() {
           placeholder="Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="px-4 py-2 bg-white rounded text-black mb-3"
+          className="px-4 py-2 rounded text-black mb-3"
         />
         <button
           onClick={checkPassword}
@@ -132,10 +151,18 @@ export default function ResponsesPage() {
     );
   }
 
-  // ✅ صفحة الإجابات
+  // ✅ الصفحة بعد تسجيل الدخول
   return (
     <div className="p-6 max-w-7xl mx-auto text-black">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white">📋 All Registrations</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-white">📋 All Registrations</h1>
+        <button
+          onClick={logout}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          🚪 Logout
+        </button>
+      </div>
 
       <div className="text-center mb-6">
         <button

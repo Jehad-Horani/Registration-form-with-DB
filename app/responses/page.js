@@ -150,7 +150,7 @@ export default function ResponsesPage() {
           placeholder="Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="px-4 py-2 rounded text-black mb-3"
+          className="px-4 py-2 rounded  border-2 m-4 text-black mb-3"
         />
         <button
           onClick={checkPassword}

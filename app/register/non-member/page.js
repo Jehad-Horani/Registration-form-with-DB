@@ -40,15 +40,15 @@ export default function NonMemberRegisterForm() {
       <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="border p-2 w-full" required />
       <input name="email" placeholder="Email Address" onChange={handleChange} className="border p-2 w-full" required />
       <input name="phone" placeholder="Phone Number" onChange={handleChange} className="border p-2 w-full" required />
-      <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="border p-2 w-full" />
+      <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="border p-2 w-full" required/>
 
-      <label className="block font-semibold">Ticket Type:</label>
+      <label className="block font-semibold" required>Ticket Type:</label>
       <select name="ticket_type" onChange={handleChange} className="border p-2 w-full bg-black">
         <option value="standard">Standard Ticket</option>
         <option value="vip">VIP Ticket</option>
       </select>
 
-      <label className="block font-semibold">Track Selection:</label>
+      <label className="block font-semibold" required>Track Selection:</label>
       <select name="track" onChange={handleChange} className="border p-2 w-full  bg-black">
         <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
         <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
@@ -57,7 +57,7 @@ export default function NonMemberRegisterForm() {
       <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="border p-2 w-full" />
 
       <label className="block font-semibold">How did you hear about the conference?</label>
-      <select name="hear_about" onChange={handleChange} className="border p-2 w-full  bg-black">
+      <select name="hear_about" onChange={handleChange} className="border p-2 w-full  bg-black" required>
         <option value="social">Social Media</option>
         <option value="university">University</option>
         <option value="email">Email</option>

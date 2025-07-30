@@ -40,23 +40,23 @@ export default function IEEERegisterForm() {
       <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="border p-2 w-full" required />
       <input name="email" placeholder="Email Address" onChange={handleChange} className="border p-2 w-full" required />
       <input name="phone" placeholder="Phone Number" onChange={handleChange} className="border p-2 w-full" required />
-      <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="border p-2 w-full" />
-      <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="border p-2 w-full" />
+      <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="border p-2 w-full" required/>
+      <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="border p-2 w-full" required/>
 
       <label className="block font-semibold">Membership Status:</label>
-      <select name="membership_status" onChange={handleChange} className="border p-2 w-full bg-black">
+      <select name="membership_status" onChange={handleChange} className="border p-2 w-full bg-black" required>
         <option value="student">Student Member</option>
         <option value="professional">Professional Member</option>
         <option value="life">Life Member</option>
       </select>
 
       <label className="block font-semibold">Ticket Type:</label>
-      <select name="ticket_type" onChange={handleChange} className="border p-2 w-full  bg-black">
+      <select name="ticket_type" onChange={handleChange} className="border p-2 w-full  bg-black" required>
         <option value="standard_ieee">Standard IEEE Member Ticket</option>
         <option value="vip_ieee">VIP IEEE Member Ticket</option>
       </select>
 
-      <label className="block font-semibold">Track Selection:</label>
+      <label className="block font-semibold" required>Track Selection:</label>
       <select name="track" onChange={handleChange} className="border p-2 w-full  bg-black">
         <option value="A">Track A: Cyber-Physical Systems in Healthcare</option>
         <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>

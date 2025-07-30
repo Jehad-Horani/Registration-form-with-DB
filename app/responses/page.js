@@ -7,50 +7,52 @@ export default function ResponsesPage() {
   const [data, setData] = useState([]);
   const [password, setPassword] = useState("");
   const [authorized, setAuthorized] = useState(false);
+  const [expiryTime, setExpiryTime] = useState(null);
 
-  // ✅ التحقق من الباسورد وتاريخ التخزين
+  // ✅ التحقق من كلمة السر وصلاحيتها
   useEffect(() => {
     const savedData = localStorage.getItem("responses_auth");
     if (savedData) {
       try {
-        const { pass, timestamp } = JSON.parse(savedData); // ✅ JSON.parse بشكل آمن
+        const { pass, timestamp } = JSON.parse(savedData);
         const now = Date.now();
+        const expiry = timestamp + 2 * 60 * 60 * 1000; // ساعتين
 
-        if (pass === "JehadMedRootsTT25" && now - timestamp < 2 * 60 * 60 * 1000) {
+        if (pass === "JehadMedRootsTT25" && now < expiry) {
           setAuthorized(true);
+          setExpiryTime(expiry);
         } else {
           localStorage.removeItem("responses_auth");
         }
-      } catch (err) {
-        localStorage.removeItem("responses_auth"); // ❌ لو التخزين قديم أو مش JSON
+      } catch {
+        localStorage.removeItem("responses_auth");
       }
     }
   }, []);
 
-
-  // ✅ تسجيل الدخول وتخزين الباسورد مع الوقت
+  // ✅ تسجيل الدخول
   const checkPassword = () => {
     if (password === "JehadMedRootsTT25") {
       const data = {
         pass: "JehadMedRootsTT25",
         timestamp: Date.now(),
       };
-      localStorage.setItem("responses_auth", JSON.stringify(data)); // ✅ JSON.stringify
+      localStorage.setItem("responses_auth", JSON.stringify(data));
       setAuthorized(true);
+      setExpiryTime(data.timestamp + 2 * 60 * 60 * 1000);
     } else {
       alert("❌ كلمة السر غير صحيحة");
     }
   };
 
-
-  // ✅ زر تسجيل الخروج
+  // ✅ تسجيل الخروج
   const logout = () => {
     localStorage.removeItem("responses_auth");
     setAuthorized(false);
     setPassword("");
   };
 
-  // ✅ تحميل البيانات بعد تسجيل الدخول
+  // ✅ جلب البيانات بعد تسجيل الدخول
   useEffect(() => {
     if (authorized) {
       const fetchResponses = async () => {
@@ -60,17 +62,19 @@ export default function ResponsesPage() {
         const sorted = result.sort(
           (a, b) => new Date(a.created_at) - new Date(b.created_at)
         );
+
         const numbered = sorted.map((item, index) => ({
           ...item,
           serial_id: index + 1,
         }));
+
         setData(numbered);
       };
       fetchResponses();
     }
   }, [authorized]);
 
-  // ✅ باقي الدوال (تحميل Word وحذف الإجابات)
+  // ✅ دوال تحميل Word وحذف الإجابات
   const generateDocForRow = (row) => [
     new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
     new Paragraph(" "),
@@ -106,6 +110,7 @@ export default function ResponsesPage() {
       alert("❌ لا توجد إجابات للتنزيل");
       return;
     }
+
     const allSections = data.flatMap((row) => generateDocForRow(row));
     const doc = new Document({
       sections: [{ children: allSections }],
@@ -135,7 +140,7 @@ export default function ResponsesPage() {
     { key: "vip_ieee", title: "🌟 VIP IEEE Members", color: "bg-purple-100" },
   ];
 
-  // ✅ شاشة إدخال كلمة السر
+  // ✅ شاشة تسجيل الدخول
   if (!authorized) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -157,11 +162,22 @@ export default function ResponsesPage() {
     );
   }
 
-  // ✅ الصفحة بعد تسجيل الدخول
+  // ✅ واجهة بعد تسجيل الدخول
   return (
     <div className="p-6 max-w-7xl mx-auto text-black">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">📋 All Registrations</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-white">📋 All Registrations</h1>
+          {expiryTime && (
+            <p className="text-gray-300 mt-1">
+              🔑 Session expires at:{" "}
+              {new Date(expiryTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          )}
+        </div>
         <button
           onClick={logout}
           className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"

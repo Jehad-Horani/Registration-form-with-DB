@@ -7,13 +7,23 @@ const supabase = createClient(
 );
 
 export async function DELETE(req) {
-  const { id } = await req.json();
+  try {
+    const { id } = await req.json();
 
-  const { error } = await supabase.from("registrations").delete().eq("id", id);
+    if (!id) {
+      return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
+    }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const { error } = await supabase.from("registrations").delete().eq("id", id);
+
+    if (error) {
+      console.error(error);
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ success: false, error: "Server Error" }, { status: 500 });
   }
-
-  return NextResponse.json({ success: true });
 }

@@ -48,7 +48,7 @@ export default function IEEERegisterForm() {
     });
 
     const result = await res.json();
-    alert(result.success ? "✅ Registered Successfully" : "❌ Error: " + result.error);
+    alert(result.success ? "✅ Thank you for your ticket purchase! We’ve received your payment and your registration is now complete. Our team will contact you within 48 hours to confirm your ticket and provide further details." : "❌ Error: " + result.error);
   };
 
   return (
@@ -104,13 +104,14 @@ export default function IEEERegisterForm() {
               <option value="student">Student Member</option>
               <option value="professional">Professional Member</option>
               <option value="life">Life Member</option>
+              <option value="IFMSA">IFMSA Member</option>
             </select>
           </div>
           <div>
             <label className="font-semibold ">Ticket Type:</label>
             <select name="ticket_type" onChange={handleChange} className="input-field w-full bg-black border-2 p-3 rounded-2xl m-2" required>
-              <option value="standard_ieee">Standard IEEE Ticket</option>
-              <option value="vip_ieee">VIP IEEE Ticket</option>
+              <option value="standard_ieee">Standard IEEE Ticket (35) JOD</option>
+              <option value="vip_ieee">VIP IEEE Ticket (75) JOD</option>
             </select>
           </div>
         </div>

@@ -48,7 +48,7 @@ export default function IEEERegisterForm() {
         });
 
         const result = await res.json();
-        alert(result.success ? "✅ Registered Successfully" : "❌ Error: " + result.error);
+        alert(result.success ? "✅ Thank you for your ticket purchase! We’ve received your payment and your registration is now complete. Our team will contact you within 48 hours to confirm your ticket and provide further details." : "❌ Error: " + result.error);
     };
 
     return (
@@ -104,8 +104,8 @@ export default function IEEERegisterForm() {
                     <div>
                         <label className="font-semibold ">Ticket Type:</label>
                         <select name="ticket_type" onChange={handleChange} className="input-field w-full bg-black border-2 p-3 rounded-2xl m-2" required>
-                            <option value="standard">Standard Ticket</option>
-                            <option value="vip">VIP Ticket</option>
+                            <option value="standard">Standard Ticket (45) JOD</option>
+                            <option value="vip">VIP Ticket (95) JOD</option>
                         </select>
                     </div>
                 </div>

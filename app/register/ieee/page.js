@@ -7,6 +7,7 @@ export default function IEEERegisterForm() {
 
   const [formData, setFormData] = useState({
     full_name: "",
+    national_id: "",
     email: "",
     phone: "",
     institution: "",
@@ -57,22 +58,49 @@ export default function IEEERegisterForm() {
         className="w-full max-w-xl bg-black text-white rounded-2xl shadow-2xl p-8 space-y-5 "
       >
         <h1 className="text-3xl font-extrabold text-center ">
-          IEEE Member Registration
+          MedRoots Summit 2025 Registration IEEE MEMBERS
         </h1>
-        <p className="text-center ">Register now for MedRoots 2025</p>
+
+        <div className="max-w-2xl mx-auto mb-6 p-4  text-white rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold mb-3">📌 MedRoots Summit 2025 – Conference Details</h2>
+          <ul className="space-y-1 text-lg">
+            <li>📍 <strong>Location:</strong> Signia By Hilton Hotel</li>
+            <li>📅 <strong>Dates:</strong> 13th & 14th September 2025</li>
+            <li>⏰ <strong>Doors Open:</strong> 9:00 AM</li>
+            <li>⭐ <strong>VIP Access Day:</strong> 15th September 2025 (VIP only)</li>
+          </ul>
+        </div>
+
+        <div className="max-w-2xl mx-auto mb-6 p-4 text-white rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold mb-3">💳 Payment Information</h2>
+          <ul className="space-y-1 text-lg">
+            <li>🏷 <strong>Alias:</strong> MRS25</li>
+            <li>🏦 <strong>Bank:</strong> Arab Bank</li>
+            <li>👤 <strong>Account Holder:</strong> Rashad Ahmad Mohammad AL Hourani</li>
+            <li>💰 <strong>Payment Method:</strong> By CLIQ</li>
+          </ul>
+        </div>
+
 
         <div className="space-y-10 space-x-8 gap-5">
-          <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
-          <input name="email" placeholder="Email Address" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
-          <input name="phone" placeholder="Phone Number" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
-          <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
-          <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl" required />
+          <input name="full_name" placeholder="Full Name (as per ID)" onChange={handleChange} className="input-field w-full border-2 p-3 rounded-2xl" required />
+          <input
+            name="national_id"
+            placeholder="National ID Number"
+            onChange={handleChange}
+            className="w-full border-2 p-3 rounded-2xl"
+            required
+          />
+          <input name="email" placeholder="Email Address" onChange={handleChange} className="input-field border-2 p-3 w-full rounded-2xl" required />
+          <input name="phone" placeholder="Phone Number" onChange={handleChange} className="input-field border-2 p-3 w-full rounded-2xl" required />
+          <input name="institution" placeholder="Institution / Organization" onChange={handleChange} className="input-field w-full border-2 p-3 rounded-2xl" required />
+          <input name="ieee_number" placeholder="IEEE Membership Number" onChange={handleChange} className="input-field w-full border-2 p-3 rounded-2xl" required />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="font-semibold ">Membership Status:</label>
-            <select name="membership_status" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2" required>
+            <select name="membership_status" onChange={handleChange} className="input-field w-full bg-black border-2 p-3 rounded-2xl m-2" required>
               <option value="student">Student Member</option>
               <option value="professional">Professional Member</option>
               <option value="life">Life Member</option>
@@ -80,7 +108,7 @@ export default function IEEERegisterForm() {
           </div>
           <div>
             <label className="font-semibold ">Ticket Type:</label>
-            <select name="ticket_type" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2" required>
+            <select name="ticket_type" onChange={handleChange} className="input-field w-full bg-black border-2 p-3 rounded-2xl m-2" required>
               <option value="standard_ieee">Standard IEEE Ticket</option>
               <option value="vip_ieee">VIP IEEE Ticket</option>
             </select>
@@ -99,13 +127,16 @@ export default function IEEERegisterForm() {
             <option value="B">Track B: Bioprinting & Prosthetic Engineering</option>
           </select>
         </div>
+        <label className="font-semibold block mb-1">
 
+          Dietary restrictions or allergies
+        </label>
 
-        <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2 mb-4" />
+        <input name="dietary" placeholder="Dietary restrictions or allergies" onChange={handleChange} className="input-field w-full border-2 p-3 rounded-2xl m-2 mb-4" />
 
         <div>
           <label className="font-semibold ">How did you hear about the conference?</label><br />
-          <select name="hear_about" onChange={handleChange} className="input-field bg-black border-2 p-3 rounded-2xl m-2 mt-4">
+          <select name="hear_about" onChange={handleChange} className="input-field w-full bg-black border-2 p-3 rounded-2xl m-2 mt-4">
             <option value="social">Social Media</option>
             <option value="university">University</option>
             <option value="email">Email</option>
@@ -115,8 +146,8 @@ export default function IEEERegisterForm() {
         </div>
 
         <h3 className="text-lg font-semibold mt-4">💳 Payment Information</h3>
-        <input name="bank_name" placeholder="Which bank did you transfer the payment from?" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2" required />
-        <input name="account_name" placeholder="Name registered with your bank account" onChange={handleChange} className="input-field border-2 p-3 rounded-2xl m-2" required /><br />
+        <input name="bank_name" placeholder="Which bank did you transfer the payment from?" onChange={handleChange} className="input-field w-full border-2 p-3 rounded-2xl m-2" required />
+        <input name="account_name" placeholder="Name registered with your bank account" onChange={handleChange} className="input-field w-full border-2 p-3 rounded-2xl m-2" required /><br />
         <label className="block font-bold mt-4">Proof of Payment:</label>
         <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="input-field w-full border-2 p-3 rounded-2xl cursor-pointer" required />
 

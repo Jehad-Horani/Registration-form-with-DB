@@ -12,6 +12,7 @@ export async function POST(req) {
 
     const {
       full_name,
+      national_id,
       email,
       phone,
       institution,
@@ -31,6 +32,7 @@ export async function POST(req) {
     const { error } = await supabase.from("registrations").insert([
       {
         full_name,
+        national_id,
         email,
         phone,
         institution,

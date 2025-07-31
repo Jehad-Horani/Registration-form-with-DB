@@ -210,6 +210,7 @@ export default function ResponsesPage() {
                     <tr>
                       <th className="border p-2">#</th>
                       <th className="border p-2">Full Name</th>
+                      <th className="border p-2">National ID</th>
                       <th className="border p-2">Email</th>
                       <th className="border p-2">Phone</th>
                       <th className="border p-2">Institution</th>
@@ -228,6 +229,7 @@ export default function ResponsesPage() {
                       <tr key={r.id} className="text-center">
                         <td className="border p-2">{r.serial_id}</td>
                         <td className="border p-2">{r.full_name}</td>
+                        <td className="border p-2">{r.national_id || "-"}</td>
                         <td className="border p-2">{r.email}</td>
                         <td className="border p-2">{r.phone}</td>
                         <td className="border p-2">{r.institution || "-"}</td>

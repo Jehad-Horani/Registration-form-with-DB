@@ -198,7 +198,7 @@ export default function ResponsesPage() {
       {sections.map((sec) => {
         const filtered = data.filter((d) => d.ticket_type === sec.key);
         return (
-          <div key={sec.key} className={`mb-8 p-4 rounded-xl shadow ${sec.color}`}>
+          <div key={sec.key} className={`mb-8 p-4 rounded-xl bg-black shadow ${sec.color}`}>
             <h2 className="text-2xl font-semibold mb-4">{sec.title}</h2>
 
             {filtered.length === 0 ? (

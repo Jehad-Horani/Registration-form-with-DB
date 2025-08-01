@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export default function IEEERegisterForm() {
+export default function NonMemberRegisterForm() {
     const [showTerms, setShowTerms] = useState(false);
     const [file, setFile] = useState(null);
 

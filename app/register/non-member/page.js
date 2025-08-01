@@ -11,9 +11,8 @@ export default function NonMemberRegisterForm() {
         email: "",
         phone: "",
         institution: "",
-        ieee_number: "",
-        membership_status: "student",
-        ticket_type: "standard_ieee",
+        membership_status: "non_member", 
+        ticket_type: "standard", 
         track: "A",
         dietary: "",
         hear_about: "social",
@@ -23,6 +22,7 @@ export default function NonMemberRegisterForm() {
         agree_terms: false,
         agree_media: false,
     });
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;

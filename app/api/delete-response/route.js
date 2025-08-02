@@ -6,7 +6,8 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export async function DELETE(req) {
+// استقبل POST بدلاً من DELETE لتتوافق مع الكود في الواجهة
+export async function POST(req) {
   try {
     const { id } = await req.json();
 

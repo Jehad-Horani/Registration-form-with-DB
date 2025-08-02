@@ -11,7 +11,6 @@ export default function ResponsesPage() {
   const [expiryTime, setExpiryTime] = useState(null);
   const [username, setUsername] = useState("");
 
-  // ✅ التحقق من كلمة السر
   useEffect(() => {
     const savedData = localStorage.getItem("responses_auth");
     if (savedData) {
@@ -19,7 +18,6 @@ export default function ResponsesPage() {
         const { pass, timestamp, user } = JSON.parse(savedData);
         const now = Date.now();
         const expiry = timestamp + 2 * 60 * 60 * 1000;
-
         if (pass === "JehadMedRootsTT25" && now < expiry) {
           setAuthorized(true);
           setExpiryTime(expiry);
@@ -86,7 +84,7 @@ export default function ResponsesPage() {
     new Paragraph(`Dietary: ${row.dietary || "-"}`),
     new Paragraph(`Heard About: ${row.hear_about}`),
     new Paragraph(`Bank Name: ${row.bank_name || "-"}`),
-    new Paragraph(`Account Name: ${row.account_name || "-"}`),
+    new Paragraph(`Account Name: ${row.account_name}`),
     new Paragraph(`Payment Proof URL: ${row.payment_proof || "-"}`),
     new Paragraph(`Verified: ${row.is_verified ? "✅ Yes" : "❌ No"}`),
     new Paragraph(`Verified By: ${row.verified_by || "-"}`),
@@ -160,6 +158,96 @@ export default function ResponsesPage() {
     }
   };
 
+  const deleteEntry = async (id) => {
+    if (!confirm("هل أنت متأكد من حذف هذا التسجيل؟")) return;
+
+    const res = await fetch("/api/delete-registration", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const result = await res.json();
+    if (result.success) {
+      setData((prev) => prev.filter((item) => item.id !== id));
+      alert("✅ تم الحذف بنجاح");
+    } else {
+      alert("❌ خطأ أثناء الحذف");
+    }
+  };
+
+  // تصنيف البيانات حسب نوع التذكرة
+  const groupedByTicket = {
+    standard: data.filter((r) => r.ticket_type === "standard"),
+    standard_ieee: data.filter((r) => r.ticket_type === "standard_ieee"),
+    vip: data.filter((r) => r.ticket_type === "vip"),
+    vip_ieee: data.filter((r) => r.ticket_type === "vip_ieee"),
+  };
+
+  const renderTable = (title, rows) => (
+    <div className="mb-10">
+      <h2 className="text-2xl font-bold mb-4 text-white">{title} ({rows.length})</h2>
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="w-full border-collapse border text-sm">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="border p-2">✅</th>
+              <th className="border p-2">#</th>
+              <th className="border p-2">Full Name</th>
+              <th className="border p-2">National ID</th>
+              <th className="border p-2">Email</th>
+              <th className="border p-2">Phone</th>
+              <th className="border p-2">Institution</th>
+              <th className="border p-2">Membership</th>
+              <th className="border p-2">Ticket</th>
+              <th className="border p-2">Track</th>
+              <th className="border p-2">Verified By</th>
+              <th className="border p-2">Date</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} className="text-center">
+                <td className="border p-2">
+                  <input
+                    type="checkbox"
+                    checked={r.is_verified || false}
+                    onChange={() => toggleVerify(r.id, r.is_verified)}
+                  />
+                </td>
+                <td className="border p-2">{r.serial_id}</td>
+                <td className="border p-2">{r.full_name}</td>
+                <td className="border p-2">{r.national_id || "-"}</td>
+                <td className="border p-2">{r.email}</td>
+                <td className="border p-2">{r.phone}</td>
+                <td className="border p-2">{r.institution || "-"}</td>
+                <td className="border p-2">{r.membership_status}</td>
+                <td className="border p-2">{r.ticket_type}</td>
+                <td className="border p-2">{r.track}</td>
+                <td className="border p-2">{r.verified_by || "-"}</td>
+                <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td className="border p-2 space-x-2">
+                  <button
+                    onClick={() => downloadWord(r)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                  >
+                    Word
+                  </button>
+                  <button
+                    onClick={() => deleteEntry(r.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   if (!authorized) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -204,56 +292,10 @@ export default function ResponsesPage() {
         </button>
       </div>
 
-      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
-        <table className="w-full border-collapse border text-sm">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="border p-2">✅</th>
-              <th className="border p-2">#</th>
-              <th className="border p-2">Full Name</th>
-              <th className="border p-2">National ID</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Phone</th>
-              <th className="border p-2">Institution</th>
-              <th className="border p-2">Membership</th>
-              <th className="border p-2">Ticket</th>
-              <th className="border p-2">Track</th>
-              <th className="border p-2">Verified By</th>
-              <th className="border p-2">Date</th>
-              <th className="border p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((r) => (
-              <tr key={r.id} className="text-center">
-                <td className="border p-2">
-                  <input
-                    type="checkbox"
-                    checked={r.is_verified || false}
-                    onChange={() => toggleVerify(r.id, r.is_verified)}
-                  />
-                </td>
-                <td className="border p-2">{r.serial_id}</td>
-                <td className="border p-2">{r.full_name}</td>
-                <td className="border p-2">{r.national_id || "-"}</td>
-                <td className="border p-2">{r.email}</td>
-                <td className="border p-2">{r.phone}</td>
-                <td className="border p-2">{r.institution || "-"}</td>
-                <td className="border p-2">{r.membership_status}</td>
-                <td className="border p-2">{r.ticket_type}</td>
-                <td className="border p-2">{r.track}</td>
-                <td className="border p-2">{r.verified_by || "-"}</td>
-                <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="border p-2 space-x-2">
-                  <button onClick={() => downloadWord(r)} className="bg-blue-500 text-white px-3 py-1 rounded">
-                    Word
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {renderTable("Standard Tickets", groupedByTicket.standard)}
+      {renderTable("Standard IEEE Tickets", groupedByTicket.standard_ieee)}
+      {renderTable("VIP Tickets", groupedByTicket.vip)}
+      {renderTable("VIP IEEE Tickets", groupedByTicket.vip_ieee)}
     </div>
   );
 }

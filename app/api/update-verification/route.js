@@ -8,24 +8,25 @@ const supabase = createClient(
 
 export async function POST(req) {
   try {
-    const { id, verified_by, is_verified } = await req.json();
+    const { id, is_verified, verified_by } = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
+    }
 
     const { error } = await supabase
       .from("registrations")
-      .update({
-        verified_by: verified_by,
-        is_verified: is_verified,
-      })
+      .update({ is_verified, verified_by })
       .eq("id", id);
 
     if (error) {
       console.error(error);
-      return NextResponse.json({ success: false, error: error.message });
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ success: false, error: "Server Error" });
+    return NextResponse.json({ success: false, error: "Server Error" }, { status: 500 });
   }
 }

@@ -162,7 +162,7 @@ export default function ResponsesPage() {
     if (!confirm("هل أنت متأكد من حذف هذا التسجيل؟")) return;
 
     const res = await fetch("/api/delete-registration", {
-      method: "POST",
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
@@ -174,6 +174,7 @@ export default function ResponsesPage() {
       alert("❌ خطأ أثناء الحذف");
     }
   };
+
 
   // تصنيف البيانات حسب نوع التذكرة
   const groupedByTicket = {

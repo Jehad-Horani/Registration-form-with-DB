@@ -6,10 +6,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-// استقبل POST بدلاً من DELETE لتتوافق مع الكود في الواجهة
-export async function POST(req) {
+export async function DELETE(request) {
   try {
-    const { id } = await req.json();
+    const { id } = await request.json();
 
     if (!id) {
       return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });

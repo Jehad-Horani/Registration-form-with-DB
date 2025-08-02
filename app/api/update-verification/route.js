@@ -6,9 +6,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { id, is_verified, verified_by } = await req.json();
+    const { id, is_verified, verified_by } = await request.json();
 
     if (!id) {
       return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });

@@ -10,7 +10,20 @@ export default function ResponsesPage() {
   const [authorized, setAuthorized] = useState(false);
   const [expiryTime, setExpiryTime] = useState(null);
   const [username, setUsername] = useState("");
-  const [changes, setChanges] = useState({});
+
+  // ✅ جلب البيانات
+  const fetchResponses = async () => {
+    const res = await fetch("/api/get-responses");
+    const result = await res.json();
+    const sorted = result.sort(
+      (a, b) => new Date(a.created_at) - new Date(b.created_at)
+    );
+    const numbered = sorted.map((item, index) => ({
+      ...item,
+      serial_id: index + 1,
+    }));
+    setData(numbered);
+  };
 
   useEffect(() => {
     const savedData = localStorage.getItem("responses_auth");
@@ -33,15 +46,10 @@ export default function ResponsesPage() {
   }, []);
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (Object.keys(changes).length > 0) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [changes]);
+    if (authorized) {
+      fetchResponses();
+    }
+  }, [authorized]);
 
   const checkPassword = () => {
     if (password === "JehadMedRootsTT25") {
@@ -57,30 +65,11 @@ export default function ResponsesPage() {
   };
 
   const logout = () => {
-    if (Object.keys(changes).length > 0 && !confirm("⚠️ عندك تغييرات غير محفوظة! هل تريد الخروج؟"))
-      return;
-
     localStorage.removeItem("responses_auth");
     setAuthorized(false);
     setPassword("");
     setUsername("");
   };
-
-  useEffect(() => {
-    if (authorized) {
-      const fetchResponses = async () => {
-        const res = await fetch("/api/get-responses");
-        const result = await res.json();
-        const sorted = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        const numbered = sorted.map((item, index) => ({
-          ...item,
-          serial_id: index + 1,
-        }));
-        setData(numbered);
-      };
-      fetchResponses();
-    }
-  }, [authorized]);
 
   const generateDocForRow = (row) => [
     new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
@@ -106,7 +95,9 @@ export default function ResponsesPage() {
   ];
 
   const downloadWord = (row) => {
-    const doc = new Document({ sections: [{ children: generateDocForRow(row) }] });
+    const doc = new Document({
+      sections: [{ children: generateDocForRow(row) }],
+    });
     Packer.toBlob(doc).then((blob) => saveAs(blob, `${row.full_name}.docx`));
   };
 
@@ -144,37 +135,24 @@ export default function ResponsesPage() {
     XLSX.writeFile(wb, "Registrations.xlsx");
   };
 
-  const handleCheckboxChange = (id, currentStatus) => {
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, is_verified: !currentStatus, verified_by: currentStatus ? null : username }
-          : item
-      )
-    );
-    setChanges((prev) => ({
-      ...prev,
-      [id]: { is_verified: !currentStatus, verified_by: currentStatus ? null : username },
-    }));
-  };
+  // ✅ الحفظ الفوري عند تغيير التشيك
+  const toggleVerify = async (id, currentStatus) => {
+    const res = await fetch("/api/update-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        verified_by: currentStatus ? null : username,
+        is_verified: !currentStatus,
+      }),
+    });
 
-  const saveAllChanges = async () => {
-    const updates = Object.entries(changes);
-    if (updates.length === 0) {
-      alert("⚠️ لا توجد تغييرات لحفظها");
-      return;
+    const result = await res.json();
+    if (result.success) {
+      await fetchResponses(); // ✅ نعيد جلب البيانات من Supabase
+    } else {
+      alert("❌ خطأ أثناء التحديث");
     }
-
-    for (const [id, updateData] of updates) {
-      await fetch("/api/update-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, ...updateData }),
-      });
-    }
-
-    alert("✅ تم حفظ كل التغييرات بنجاح");
-    setChanges({});
   };
 
   const deleteEntry = async (id) => {
@@ -185,11 +163,10 @@ export default function ResponsesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    const result = await res.json();
 
+    const result = await res.json();
     if (result.success) {
-      setData((prev) => prev.filter((item) => item.id !== id));
-      alert("✅ تم الحذف بنجاح");
+      fetchResponses();
     } else {
       alert("❌ خطأ أثناء الحذف");
     }
@@ -204,9 +181,7 @@ export default function ResponsesPage() {
 
   const renderTable = (title, rows) => (
     <div className="mb-10">
-      <h2 className="text-2xl font-bold mb-4 text-white">
-        {title} ({rows.length})
-      </h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">{title} ({rows.length})</h2>
       <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
         <table className="w-full border-collapse border text-sm">
           <thead className="bg-gray-200">
@@ -233,7 +208,7 @@ export default function ResponsesPage() {
                   <input
                     type="checkbox"
                     checked={r.is_verified || false}
-                    onChange={() => handleCheckboxChange(r.id, r.is_verified)}
+                    onChange={() => toggleVerify(r.id, r.is_verified)}
                   />
                 </td>
                 <td className="border p-2">{r.serial_id}</td>
@@ -291,7 +266,7 @@ export default function ResponsesPage() {
   }
 
   return (
-    <div className="p-6 bg-gray-900 min-h-screen">
+    <div className="p-6 bg-gray-900 text-black min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">📋 All Registrations</h1>
@@ -301,21 +276,12 @@ export default function ResponsesPage() {
             </p>
           )}
         </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={saveAllChanges}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            💾 Save Changes
-          </button>
-          <button
-            onClick={logout}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            🚪 Logout
-          </button>
-        </div>
+        <button
+          onClick={logout}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          🚪 Logout
+        </button>
       </div>
 
       <div className="flex gap-4 mb-6">

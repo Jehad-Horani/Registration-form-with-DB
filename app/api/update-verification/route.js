@@ -6,27 +6,40 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const { id, is_verified, verified_by } = await request.json();
+    const { id, is_verified, verified_by } = await req.json();
 
     if (!id) {
-      return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Missing registration ID" },
+        { status: 400 }
+      );
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("registrations")
-      .update({ is_verified, verified_by })
-      .eq("id", id);
+      .update({
+        is_verified,
+        verified_by,
+      })
+      .eq("id", id)
+      .select();
 
     if (error) {
-      console.error(error);
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+      console.error("Supabase update error:", error);
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, data });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false, error: "Server Error" }, { status: 500 });
+    console.error("API error:", err);
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    );
   }
 }

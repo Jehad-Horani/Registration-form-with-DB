@@ -10,6 +10,8 @@ export default function ResponsesPage() {
   const [authorized, setAuthorized] = useState(false);
   const [expiryTime, setExpiryTime] = useState(null);
   const [username, setUsername] = useState("");
+    const [changes, setChanges] = useState({}); // لتخزين التغييرات
+
 
   // ✅ جلب البيانات
   const fetchResponses = async () => {
@@ -69,6 +71,70 @@ export default function ResponsesPage() {
     setAuthorized(false);
     setPassword("");
     setUsername("");
+  };
+
+
+
+   useEffect(() => {
+    if (authorized) {
+      const fetchResponses = async () => {
+        const res = await fetch("/api/get-responses");
+        const result = await res.json();
+        const sorted = result.sort(
+          (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+        const numbered = sorted.map((item, index) => ({
+          ...item,
+          serial_id: index + 1,
+        }));
+        setData(numbered);
+      };
+      fetchResponses();
+    }
+  }, [authorized]);
+
+  // تغيير حالة التحقق في الواجهة فقط
+  const handleCheckboxChange = (id, currentStatus) => {
+    setChanges((prev) => ({
+      ...prev,
+      [id]: { is_verified: !currentStatus, verified_by: !currentStatus ? username : null },
+    }));
+
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, is_verified: !currentStatus, verified_by: !currentStatus ? username : null }
+          : item
+      )
+    );
+  };
+
+  // زر حفظ التغييرات وإرسالها للداتا بيس دفعة واحدة
+  const saveChanges = async () => {
+    const updates = Object.entries(changes).map(([id, val]) => ({
+      id: Number(id),
+      ...val,
+    }));
+
+    if (updates.length === 0) {
+      alert("لم يتم تعديل أي سجلات للحفظ.");
+      return;
+    }
+
+    const res = await fetch("/api/update-verifications-bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ updates }),
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert("✅ تم حفظ التغييرات بنجاح");
+      setChanges({});
+    } else {
+      alert("❌ خطأ أثناء الحفظ");
+    }
   };
 
   const generateDocForRow = (row) => [
@@ -296,6 +362,14 @@ export default function ResponsesPage() {
           🚪 Logout
         </button>
       </div>
+
+
+        <button
+        onClick={saveChanges}
+        className="bg-blue-600 text-white px-6 py-2 rounded-lg mb-6 hover:bg-blue-700"
+      >
+        💾 Save Verification Changes
+      </button>
 
       <div className="flex gap-4 mb-6">
         <button

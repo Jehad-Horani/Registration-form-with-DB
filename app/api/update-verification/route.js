@@ -10,36 +10,19 @@ export async function POST(req) {
   try {
     const { id, is_verified, verified_by } = await req.json();
 
-    if (!id) {
-      return NextResponse.json(
-        { success: false, message: "Missing registration ID" },
-        { status: 400 }
-      );
-    }
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("registrations")
-      .update({
-        is_verified,
-        verified_by,
-      })
-      .eq("id", id)
-      .select();
+      .update({ is_verified, verified_by })
+      .eq("id", id);
 
     if (error) {
-      console.error("Supabase update error:", error);
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 500 }
-      );
+      console.error(error);
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("API error:", err);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+    console.error(err);
+    return NextResponse.json({ success: false, error: "Server Error" }, { status: 500 });
   }
 }

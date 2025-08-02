@@ -136,32 +136,34 @@ export default function ResponsesPage() {
   };
 
   // ✅ الحفظ الفوري عند تغيير التشيك
-  const toggleVerify = async (id, currentStatus) => {
-    // تحديث فوري قبل الاتصال بـ API (Optimistic UI)
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, is_verified: !currentStatus, verified_by: currentStatus ? null : username }
-          : item
-      )
-    );
+ const toggleVerify = async (id, currentStatus) => {
+  // تحديث فوري (Optimistic UI)
+  setData((prev) =>
+    prev.map((item) =>
+      item.id === id
+        ? { ...item, is_verified: !currentStatus, verified_by: currentStatus ? null : username }
+        : item
+    )
+  );
 
-    // إرسال التحديث للـ API
-    const res = await fetch("/api/update-verification", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id,
-        verified_by: currentStatus ? null : username,
-        is_verified: !currentStatus,
-      }),
-    });
+  // إرسال التحديث لـ API
+  const res = await fetch("/api/update-verification", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id,
+      verified_by: currentStatus ? null : username,
+      is_verified: !currentStatus,
+    }),
+  });
 
-    const result = await res.json();
-    if (!result.success) {
-      alert("❌ خطأ أثناء التحديث");
-    }
-  };
+  const result = await res.json();
+
+  if (!result.success) {
+    alert("❌ خطأ أثناء التحديث");
+  }
+};
+
 
 
   const deleteEntry = async (id) => {

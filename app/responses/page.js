@@ -137,6 +137,16 @@ export default function ResponsesPage() {
 
   // ✅ الحفظ الفوري عند تغيير التشيك
   const toggleVerify = async (id, currentStatus) => {
+    // تحديث فوري قبل الاتصال بـ API (Optimistic UI)
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, is_verified: !currentStatus, verified_by: currentStatus ? null : username }
+          : item
+      )
+    );
+
+    // إرسال التحديث للـ API
     const res = await fetch("/api/update-verification", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -148,12 +158,11 @@ export default function ResponsesPage() {
     });
 
     const result = await res.json();
-    if (result.success) {
-      await fetchResponses(); // ✅ نعيد جلب البيانات من Supabase
-    } else {
+    if (!result.success) {
       alert("❌ خطأ أثناء التحديث");
     }
   };
+
 
   const deleteEntry = async (id) => {
     if (!confirm("هل أنت متأكد من حذف هذا التسجيل؟")) return;
@@ -209,7 +218,9 @@ export default function ResponsesPage() {
                     type="checkbox"
                     checked={r.is_verified || false}
                     onChange={() => toggleVerify(r.id, r.is_verified)}
+                    className="cursor-pointer"
                   />
+
                 </td>
                 <td className="border p-2">{r.serial_id}</td>
                 <td className="border p-2">{r.full_name}</td>

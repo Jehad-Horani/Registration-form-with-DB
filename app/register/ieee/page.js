@@ -104,7 +104,7 @@ export default function IEEERegisterForm() {
               <option value="student">Student Member</option>
               <option value="professional">Professional Member</option>
               <option value="life">Life Member</option>
-              <option value="IFMSA">IFMSA Member</option>
+              <option value="ifmsa">IFMSA Member</option>
             </select>
           </div>
           <div>

@@ -10,8 +10,7 @@ export default function ResponsesPage() {
   const [authorized, setAuthorized] = useState(false);
   const [expiryTime, setExpiryTime] = useState(null);
   const [username, setUsername] = useState("");
-    const [changes, setChanges] = useState({}); // لتخزين التغييرات
-
+  const [pendingChanges, setPendingChanges] = useState({}); // key: id, value: { is_verified, verified_by }
 
   // ✅ جلب البيانات
   const fetchResponses = async () => {
@@ -50,6 +49,7 @@ export default function ResponsesPage() {
   useEffect(() => {
     if (authorized) {
       fetchResponses();
+      setPendingChanges({}); // Reset pending changes on fresh fetch
     }
   }, [authorized]);
 
@@ -73,37 +73,25 @@ export default function ResponsesPage() {
     setUsername("");
   };
 
-
-
-   useEffect(() => {
-    if (authorized) {
-      const fetchResponses = async () => {
-        const res = await fetch("/api/get-responses");
-        const result = await res.json();
-        const sorted = result.sort(
-          (a, b) => new Date(a.created_at) - new Date(b.created_at)
-        );
-        const numbered = sorted.map((item, index) => ({
-          ...item,
-          serial_id: index + 1,
-        }));
-        setData(numbered);
-      };
-      fetchResponses();
-    }
-  }, [authorized]);
-
-  // تغيير حالة التحقق في الواجهة فقط
+  // تغيير حالة التحقق في الواجهة (تحديث pendingChanges فقط)
   const handleCheckboxChange = (id, currentStatus) => {
-    setChanges((prev) => ({
+    setPendingChanges((prev) => ({
       ...prev,
-      [id]: { is_verified: !currentStatus, verified_by: !currentStatus ? username : null },
+      [id]: {
+        is_verified: !currentStatus,
+        verified_by: !currentStatus ? username : null,
+      },
     }));
 
+    // تحديث البيانات في الواجهة لعرض التغيير فورًا
     setData((prev) =>
       prev.map((item) =>
         item.id === id
-          ? { ...item, is_verified: !currentStatus, verified_by: !currentStatus ? username : null }
+          ? {
+              ...item,
+              is_verified: !currentStatus,
+              verified_by: !currentStatus ? username : null,
+            }
           : item
       )
     );
@@ -111,7 +99,7 @@ export default function ResponsesPage() {
 
   // زر حفظ التغييرات وإرسالها للداتا بيس دفعة واحدة
   const saveChanges = async () => {
-    const updates = Object.entries(changes).map(([id, val]) => ({
+    const updates = Object.entries(pendingChanges).map(([id, val]) => ({
       id: Number(id),
       ...val,
     }));
@@ -131,12 +119,14 @@ export default function ResponsesPage() {
 
     if (result.success) {
       alert("✅ تم حفظ التغييرات بنجاح");
-      setChanges({});
+      setPendingChanges({});
+      fetchResponses(); // إعادة جلب البيانات بعد الحفظ لضمان التزامن
     } else {
       alert("❌ خطأ أثناء الحفظ");
     }
   };
 
+  // توليد ملف وورد لسجل واحد
   const generateDocForRow = (row) => [
     new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
     new Paragraph(new TextRun({ text: `Registration ID: ${row.serial_id}`, bold: true })),
@@ -201,37 +191,6 @@ export default function ResponsesPage() {
     XLSX.writeFile(wb, "Registrations.xlsx");
   };
 
-  // ✅ الحفظ الفوري عند تغيير التشيك
- const toggleVerify = async (id, currentStatus) => {
-  // تحديث فوري (Optimistic UI)
-  setData((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? { ...item, is_verified: !currentStatus, verified_by: currentStatus ? null : username }
-        : item
-    )
-  );
-
-  // إرسال التحديث لـ API
-  const res = await fetch("/api/update-verification", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      id,
-      verified_by: currentStatus ? null : username,
-      is_verified: !currentStatus,
-    }),
-  });
-
-  const result = await res.json();
-
-  if (!result.success) {
-    alert("❌ خطأ أثناء التحديث");
-  }
-};
-
-
-
   const deleteEntry = async (id) => {
     if (!confirm("هل أنت متأكد من حذف هذا التسجيل؟")) return;
 
@@ -256,9 +215,12 @@ export default function ResponsesPage() {
     vip_ieee: data.filter((r) => r.ticket_type === "vip_ieee"),
   };
 
+  // العرض مع الأخذ بالحسبان التعديلات المؤقتة في pendingChanges
   const renderTable = (title, rows) => (
     <div className="mb-10">
-      <h2 className="text-2xl font-bold mb-4 text-white">{title} ({rows.length})</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">
+        {title} ({rows.length})
+      </h2>
       <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
         <table className="w-full border-collapse border text-sm">
           <thead className="bg-gray-200">
@@ -279,44 +241,53 @@ export default function ResponsesPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className="text-center">
-                <td className="border p-2">
-                  <input
-                    type="checkbox"
-                    checked={r.is_verified || false}
-                    onChange={() => toggleVerify(r.id, r.is_verified)}
-                    className="cursor-pointer"
-                  />
+            {rows.map((r) => {
+              const isPending = pendingChanges[r.id];
+              const isChecked = isPending
+                ? pendingChanges[r.id].is_verified
+                : r.is_verified || false;
+              const verifiedBy = isPending
+                ? pendingChanges[r.id].verified_by || "-"
+                : r.verified_by || "-";
 
-                </td>
-                <td className="border p-2">{r.serial_id}</td>
-                <td className="border p-2">{r.full_name}</td>
-                <td className="border p-2">{r.national_id || "-"}</td>
-                <td className="border p-2">{r.email}</td>
-                <td className="border p-2">{r.phone}</td>
-                <td className="border p-2">{r.institution || "-"}</td>
-                <td className="border p-2">{r.membership_status}</td>
-                <td className="border p-2">{r.ticket_type}</td>
-                <td className="border p-2">{r.track}</td>
-                <td className="border p-2">{r.verified_by || "-"}</td>
-                <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="border p-2 space-x-2">
-                  <button
-                    onClick={() => downloadWord(r)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                  >
-                    Word
-                  </button>
-                  <button
-                    onClick={() => deleteEntry(r.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+              return (
+                <tr key={r.id} className="text-center">
+                  <td className="border p-2">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleCheckboxChange(r.id, isChecked)}
+                      className="cursor-pointer"
+                    />
+                  </td>
+                  <td className="border p-2">{r.serial_id}</td>
+                  <td className="border p-2">{r.full_name}</td>
+                  <td className="border p-2">{r.national_id || "-"}</td>
+                  <td className="border p-2">{r.email}</td>
+                  <td className="border p-2">{r.phone}</td>
+                  <td className="border p-2">{r.institution || "-"}</td>
+                  <td className="border p-2">{r.membership_status}</td>
+                  <td className="border p-2">{r.ticket_type}</td>
+                  <td className="border p-2">{r.track}</td>
+                  <td className="border p-2">{verifiedBy}</td>
+                  <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td className="border p-2 space-x-2">
+                    <button
+                      onClick={() => downloadWord(r)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                    >
+                      Word
+                    </button>
+                    <button
+                      onClick={() => deleteEntry(r.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -363,8 +334,7 @@ export default function ResponsesPage() {
         </button>
       </div>
 
-
-        <button
+      <button
         onClick={saveChanges}
         className="bg-blue-600 text-white px-6 py-2 rounded-lg mb-6 hover:bg-blue-700"
       >

@@ -2,25 +2,28 @@
 import { useEffect, useState } from "react";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 export default function ResponsesPage() {
   const [data, setData] = useState([]);
   const [password, setPassword] = useState("");
   const [authorized, setAuthorized] = useState(false);
   const [expiryTime, setExpiryTime] = useState(null);
+  const [username, setUsername] = useState("");
 
-  // ✅ التحقق من كلمة السر وصلاحيتها
+  // ✅ التحقق من كلمة السر
   useEffect(() => {
     const savedData = localStorage.getItem("responses_auth");
     if (savedData) {
       try {
-        const { pass, timestamp } = JSON.parse(savedData);
+        const { pass, timestamp, user } = JSON.parse(savedData);
         const now = Date.now();
-        const expiry = timestamp + 2 * 60 * 60 * 1000; // ساعتين
+        const expiry = timestamp + 2 * 60 * 60 * 1000;
 
         if (pass === "JehadMedRootsTT25" && now < expiry) {
           setAuthorized(true);
           setExpiryTime(expiry);
+          setUsername(user || "");
         } else {
           localStorage.removeItem("responses_auth");
         }
@@ -30,58 +33,51 @@ export default function ResponsesPage() {
     }
   }, []);
 
-  // ✅ تسجيل الدخول
   const checkPassword = () => {
     if (password === "JehadMedRootsTT25") {
-      const data = {
-        pass: "JehadMedRootsTT25",
-        timestamp: Date.now(),
-      };
+      const user = prompt("✅ أدخل اسمك لتسجيل من قام بالتحقق:");
+      const data = { pass: "JehadMedRootsTT25", timestamp: Date.now(), user };
       localStorage.setItem("responses_auth", JSON.stringify(data));
       setAuthorized(true);
       setExpiryTime(data.timestamp + 2 * 60 * 60 * 1000);
+      setUsername(user);
     } else {
       alert("❌ كلمة السر غير صحيحة");
     }
   };
 
-  // ✅ تسجيل الخروج
   const logout = () => {
     localStorage.removeItem("responses_auth");
     setAuthorized(false);
     setPassword("");
+    setUsername("");
   };
 
-  // ✅ جلب البيانات بعد تسجيل الدخول
   useEffect(() => {
     if (authorized) {
       const fetchResponses = async () => {
         const res = await fetch("/api/get-responses");
         const result = await res.json();
-
         const sorted = result.sort(
           (a, b) => new Date(a.created_at) - new Date(b.created_at)
         );
-
         const numbered = sorted.map((item, index) => ({
           ...item,
           serial_id: index + 1,
         }));
-
         setData(numbered);
       };
       fetchResponses();
     }
   }, [authorized]);
 
-  // ✅ دوال تحميل Word وحذف الإجابات
   const generateDocForRow = (row) => [
     new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
-    new Paragraph(" "),
     new Paragraph(new TextRun({ text: `Registration ID: ${row.serial_id}`, bold: true })),
     new Paragraph(new TextRun({ text: `Full Name: ${row.full_name}`, bold: true })),
     new Paragraph(`Email: ${row.email}`),
     new Paragraph(`Phone: ${row.phone}`),
+    new Paragraph(`National ID: ${row.national_id || "-"}`),
     new Paragraph(`Institution: ${row.institution || "-"}`),
     new Paragraph(`IEEE Number: ${row.ieee_number || "-"}`),
     new Paragraph(`Membership Status: ${row.membership_status || "-"}`),
@@ -92,10 +88,10 @@ export default function ResponsesPage() {
     new Paragraph(`Bank Name: ${row.bank_name || "-"}`),
     new Paragraph(`Account Name: ${row.account_name || "-"}`),
     new Paragraph(`Payment Proof URL: ${row.payment_proof || "-"}`),
+    new Paragraph(`Verified: ${row.is_verified ? "✅ Yes" : "❌ No"}`),
+    new Paragraph(`Verified By: ${row.verified_by || "-"}`),
     new Paragraph(`Date: ${new Date(row.created_at).toLocaleDateString()}`),
-    new Paragraph(" "),
     new Paragraph("--------------------------------------------------"),
-    new Paragraph(" "),
   ];
 
   const downloadWord = (row) => {
@@ -110,37 +106,60 @@ export default function ResponsesPage() {
       alert("❌ لا توجد إجابات للتنزيل");
       return;
     }
-
     const allSections = data.flatMap((row) => generateDocForRow(row));
-    const doc = new Document({
-      sections: [{ children: allSections }],
-    });
+    const doc = new Document({ sections: [{ children: allSections }] });
     Packer.toBlob(doc).then((blob) => saveAs(blob, "All_Registrations.docx"));
   };
 
-  const deleteResponse = async (id) => {
-    const res = await fetch("/api/delete-response", {
-      method: "DELETE",
+  const downloadExcel = () => {
+    const rows = data.map((r) => ({
+      ID: r.serial_id,
+      Name: r.full_name,
+      "National ID": r.national_id,
+      Email: r.email,
+      Phone: r.phone,
+      Institution: r.institution,
+      "IEEE #": r.ieee_number,
+      Membership: r.membership_status,
+      Ticket: r.ticket_type,
+      Track: r.track,
+      Bank: r.bank_name,
+      "Account Name": r.account_name,
+      Verified: r.is_verified ? "Yes" : "No",
+      "Verified By": r.verified_by || "-",
+      Date: new Date(r.created_at).toLocaleDateString(),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Registrations");
+    XLSX.writeFile(wb, "Registrations.xlsx");
+  };
+
+  const toggleVerify = async (id, currentStatus) => {
+    const res = await fetch("/api/update-verification", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({
+        id,
+        verified_by: currentStatus ? null : username,
+        is_verified: !currentStatus,
+      }),
     });
+
     const result = await res.json();
     if (result.success) {
-      setData((prev) => prev.filter((item) => item.id !== id));
-      alert("✅ تم حذف الإجابة");
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, is_verified: !currentStatus, verified_by: currentStatus ? null : username }
+            : item
+        )
+      );
     } else {
-      alert("❌ خطأ: " + result.error);
+      alert("❌ خطأ أثناء التحديث");
     }
   };
 
-  const sections = [
-    { key: "standard", title: "🎟 Standard Tickets", color: "bg-blue-100" },
-    { key: "vip", title: "💎 VIP Tickets", color: "bg-yellow-100" },
-    { key: "standard_ieee", title: "🔹 Standard IEEE Members", color: "bg-green-100" },
-    { key: "vip_ieee", title: "🌟 VIP IEEE Members", color: "bg-purple-100" },
-  ];
-
-  // ✅ شاشة تسجيل الدخول
   if (!authorized) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -150,7 +169,7 @@ export default function ResponsesPage() {
           placeholder="Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="px-4 py-2 rounded  border-2 m-4 text-black mb-3"
+          className="px-4 py-2 rounded border-2 m-4 text-black"
         />
         <button
           onClick={checkPassword}
@@ -162,121 +181,79 @@ export default function ResponsesPage() {
     );
   }
 
-  // ✅ واجهة بعد تسجيل الدخول
   return (
-    <div className="p-6 bg-gray-900 text-black">
+    <div className="p-6 bg-gray-900 text-black min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">📋 All Registrations</h1>
           {expiryTime && (
-            <p className="text-gray-300 mt-1">
-              🔑 Session expires at:{" "}
-              {new Date(expiryTime).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
+            <p className="text-gray-300">🔑 Session expires at: {new Date(expiryTime).toLocaleTimeString()}</p>
           )}
         </div>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
+        <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
           🚪 Logout
         </button>
       </div>
 
-      <div className="text-center mb-6">
-        <button
-          onClick={downloadAllWord}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-        >
+      <div className="flex gap-4 mb-6">
+        <button onClick={downloadAllWord} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
           ⬇️ Download All as Word
+        </button>
+        <button onClick={downloadExcel} className="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600">
+          📊 Download Excel
         </button>
       </div>
 
-      {sections.map((sec) => {
-        const filtered = data.filter((d) => d.ticket_type === sec.key);
-        return (
-          <div key={sec.key} className={`mb-8 p-4 rounded-xl bg-black shadow ${sec.color}`}>
-            <h2 className="text-2xl font-semibold mb-4">{sec.title}</h2>
-
-            {filtered.length === 0 ? (
-              <p className="text-gray-500">No registrations yet.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300 text-sm">
-                  <thead className="bg-gray-200">
-                    <tr>
-                      <th className="border p-2">#</th>
-                      <th className="border p-2">Full Name</th>
-                      <th className="border p-2">National ID</th>
-                      <th className="border p-2">Email</th>
-                      <th className="border p-2">Phone</th>
-                      <th className="border p-2">Institution</th>
-                      <th className="border p-2">IEEE #</th>
-                      <th className="border p-2">Membership</th>
-                      <th className="border p-2">Track</th>
-                      <th className="border p-2">Bank</th>
-                      <th className="border p-2">Account Name</th>
-                      <th className="border p-2">Payment Proof</th>
-                      <th className="border p-2">Date</th>
-                      <th className="border p-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((r) => (
-                      <tr key={r.id} className="text-center">
-                        <td className="border p-2">{r.serial_id}</td>
-                        <td className="border p-2">{r.full_name}</td>
-                        <td className="border p-2">{r.national_id || "-"}</td>
-                        <td className="border p-2">{r.email}</td>
-                        <td className="border p-2">{r.phone}</td>
-                        <td className="border p-2">{r.institution || "-"}</td>
-                        <td className="border p-2">{r.ieee_number || "-"}</td>
-                        <td className="border p-2">{r.membership_status || "-"}</td>
-                        <td className="border p-2">{r.track}</td>
-                        <td className="border p-2">{r.bank_name || "-"}</td>
-                        <td className="border p-2">{r.account_name || "-"}</td>
-                        <td className="border p-2">
-                          {r.payment_proof ? (
-                            <a
-                              href={r.payment_proof}
-                              target="_blank"
-                              className="text-blue-600 underline"
-                            >
-                              View
-                            </a>
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className="border p-2">
-                          {new Date(r.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="border p-2 space-x-2">
-                          <button
-                            onClick={() => deleteResponse(r.id)}
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
-                          <button
-                            onClick={() => downloadWord(r)}
-                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                          >
-                            Word
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        );
-      })}
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="w-full border-collapse border text-sm">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="border p-2">✅</th>
+              <th className="border p-2">#</th>
+              <th className="border p-2">Full Name</th>
+              <th className="border p-2">National ID</th>
+              <th className="border p-2">Email</th>
+              <th className="border p-2">Phone</th>
+              <th className="border p-2">Institution</th>
+              <th className="border p-2">Membership</th>
+              <th className="border p-2">Ticket</th>
+              <th className="border p-2">Track</th>
+              <th className="border p-2">Verified By</th>
+              <th className="border p-2">Date</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((r) => (
+              <tr key={r.id} className="text-center">
+                <td className="border p-2">
+                  <input
+                    type="checkbox"
+                    checked={r.is_verified || false}
+                    onChange={() => toggleVerify(r.id, r.is_verified)}
+                  />
+                </td>
+                <td className="border p-2">{r.serial_id}</td>
+                <td className="border p-2">{r.full_name}</td>
+                <td className="border p-2">{r.national_id || "-"}</td>
+                <td className="border p-2">{r.email}</td>
+                <td className="border p-2">{r.phone}</td>
+                <td className="border p-2">{r.institution || "-"}</td>
+                <td className="border p-2">{r.membership_status}</td>
+                <td className="border p-2">{r.ticket_type}</td>
+                <td className="border p-2">{r.track}</td>
+                <td className="border p-2">{r.verified_by || "-"}</td>
+                <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td className="border p-2 space-x-2">
+                  <button onClick={() => downloadWord(r)} className="bg-blue-500 text-white px-3 py-1 rounded">
+                    Word
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

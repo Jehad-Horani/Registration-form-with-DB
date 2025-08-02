@@ -10,9 +10,8 @@ export default function ResponsesPage() {
   const [authorized, setAuthorized] = useState(false);
   const [expiryTime, setExpiryTime] = useState(null);
   const [username, setUsername] = useState("");
-  const [changes, setChanges] = useState({}); // ✅ لحفظ التغييرات قبل الحفظ
+  const [changes, setChanges] = useState({});
 
-  // 🔹 تحميل الجلسة المخزنة
   useEffect(() => {
     const savedData = localStorage.getItem("responses_auth");
     if (savedData) {
@@ -33,7 +32,6 @@ export default function ResponsesPage() {
     }
   }, []);
 
-  // 🔹 تحذير عند محاولة إغلاق الصفحة بوجود تغييرات
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (Object.keys(changes).length > 0) {
@@ -45,7 +43,6 @@ export default function ResponsesPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [changes]);
 
-  // 🔹 تسجيل الدخول
   const checkPassword = () => {
     if (password === "JehadMedRootsTT25") {
       const user = prompt("✅ أدخل اسمك لتسجيل من قام بالتحقق:");
@@ -59,7 +56,6 @@ export default function ResponsesPage() {
     }
   };
 
-  // 🔹 تسجيل الخروج
   const logout = () => {
     if (Object.keys(changes).length > 0 && !confirm("⚠️ عندك تغييرات غير محفوظة! هل تريد الخروج؟"))
       return;
@@ -70,7 +66,6 @@ export default function ResponsesPage() {
     setUsername("");
   };
 
-  // 🔹 جلب البيانات
   useEffect(() => {
     if (authorized) {
       const fetchResponses = async () => {
@@ -87,7 +82,6 @@ export default function ResponsesPage() {
     }
   }, [authorized]);
 
-  // ✅ توليد ملف Word لصف واحد
   const generateDocForRow = (row) => [
     new Paragraph({ text: "Conference Registration", heading: "Heading1" }),
     new Paragraph(new TextRun({ text: `Registration ID: ${row.serial_id}`, bold: true })),
@@ -100,6 +94,11 @@ export default function ResponsesPage() {
     new Paragraph(`Membership Status: ${row.membership_status || "-"}`),
     new Paragraph(`Ticket Type: ${row.ticket_type}`),
     new Paragraph(`Track: ${row.track}`),
+    new Paragraph(`Dietary: ${row.dietary || "-"}`),
+    new Paragraph(`Heard About: ${row.hear_about}`),
+    new Paragraph(`Bank Name: ${row.bank_name || "-"}`),
+    new Paragraph(`Account Name: ${row.account_name}`),
+    new Paragraph(`Payment Proof URL: ${row.payment_proof || "-"}`),
     new Paragraph(`Verified: ${row.is_verified ? "✅ Yes" : "❌ No"}`),
     new Paragraph(`Verified By: ${row.verified_by || "-"}`),
     new Paragraph(`Date: ${new Date(row.created_at).toLocaleDateString()}`),
@@ -107,9 +106,7 @@ export default function ResponsesPage() {
   ];
 
   const downloadWord = (row) => {
-    const doc = new Document({
-      sections: [{ children: generateDocForRow(row) }],
-    });
+    const doc = new Document({ sections: [{ children: generateDocForRow(row) }] });
     Packer.toBlob(doc).then((blob) => saveAs(blob, `${row.full_name}.docx`));
   };
 
@@ -131,9 +128,12 @@ export default function ResponsesPage() {
       Email: r.email,
       Phone: r.phone,
       Institution: r.institution,
+      "IEEE #": r.ieee_number,
       Membership: r.membership_status,
       Ticket: r.ticket_type,
       Track: r.track,
+      Bank: r.bank_name,
+      "Account Name": r.account_name,
       Verified: r.is_verified ? "Yes" : "No",
       "Verified By": r.verified_by || "-",
       Date: new Date(r.created_at).toLocaleDateString(),
@@ -144,7 +144,6 @@ export default function ResponsesPage() {
     XLSX.writeFile(wb, "Registrations.xlsx");
   };
 
-  // 🔹 تحديث التحقق محليًا
   const handleCheckboxChange = (id, currentStatus) => {
     setData((prev) =>
       prev.map((item) =>
@@ -153,14 +152,12 @@ export default function ResponsesPage() {
           : item
       )
     );
-
     setChanges((prev) => ({
       ...prev,
       [id]: { is_verified: !currentStatus, verified_by: currentStatus ? null : username },
     }));
   };
 
-  // 🔹 حفظ كل التغييرات
   const saveAllChanges = async () => {
     const updates = Object.entries(changes);
     if (updates.length === 0) {
@@ -180,7 +177,6 @@ export default function ResponsesPage() {
     setChanges({});
   };
 
-  // 🔹 حذف تسجيل
   const deleteEntry = async (id) => {
     if (!confirm("هل أنت متأكد من حذف هذا التسجيل؟")) return;
 
@@ -218,9 +214,15 @@ export default function ResponsesPage() {
               <th className="border p-2">✅</th>
               <th className="border p-2">#</th>
               <th className="border p-2">Full Name</th>
+              <th className="border p-2">National ID</th>
               <th className="border p-2">Email</th>
               <th className="border p-2">Phone</th>
+              <th className="border p-2">Institution</th>
+              <th className="border p-2">Membership</th>
+              <th className="border p-2">Ticket</th>
+              <th className="border p-2">Track</th>
               <th className="border p-2">Verified By</th>
+              <th className="border p-2">Date</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
@@ -236,9 +238,15 @@ export default function ResponsesPage() {
                 </td>
                 <td className="border p-2">{r.serial_id}</td>
                 <td className="border p-2">{r.full_name}</td>
+                <td className="border p-2">{r.national_id || "-"}</td>
                 <td className="border p-2">{r.email}</td>
                 <td className="border p-2">{r.phone}</td>
+                <td className="border p-2">{r.institution || "-"}</td>
+                <td className="border p-2">{r.membership_status}</td>
+                <td className="border p-2">{r.ticket_type}</td>
+                <td className="border p-2">{r.track}</td>
                 <td className="border p-2">{r.verified_by || "-"}</td>
+                <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
                 <td className="border p-2 space-x-2">
                   <button
                     onClick={() => downloadWord(r)}

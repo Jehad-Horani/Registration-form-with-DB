@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY // لازم تستخدم مفتاح سيرفر عندك صلاحيات كتابة
+  process.env.SUPABASE_SERVICE_ROLE_KEY // المفتاح السري من Vercel
 );
 
 export async function POST(request) {
@@ -26,9 +26,9 @@ export async function POST(request) {
         .eq("id", id);
 
       if (error) {
-        console.error(`Error updating id ${id}:`, error);
+        console.error(`❌ Error updating id ${id}:`, error.message);
         return NextResponse.json(
-          { success: false, message: `Failed to update id ${id}` },
+          { success: false, message: error.message },
           { status: 400 }
         );
       }
@@ -36,9 +36,9 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Server error:", err);
+    console.error("🔥 Server error:", err);
     return NextResponse.json(
-      { success: false, message: "Server error" },
+      { success: false, message: err.message || "Server error" },
       { status: 500 }
     );
   }

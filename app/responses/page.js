@@ -100,7 +100,7 @@ export default function ResponsesPage() {
   // زر حفظ التغييرات وإرسالها للداتا بيس دفعة واحدة
   const saveChanges = async () => {
     const updates = Object.entries(pendingChanges).map(([id, val]) => ({
-      id: Number(id),
+      id,
       ...val,
     }));
 

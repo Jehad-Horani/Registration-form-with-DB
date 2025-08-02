@@ -8,29 +8,21 @@ const supabase = createClient(
 
 export async function POST(request) {
   try {
-    const { updates } = await request.json();
+    const { id, is_verified, verified_by } = await request.json();
 
-    if (!updates || !Array.isArray(updates)) {
-      return NextResponse.json({ success: false, error: "Invalid updates data" }, { status: 400 });
-    }
+    const { error } = await supabase
+      .from("registrations")
+      .update({ is_verified, verified_by })
+      .eq("id", id);
 
-    for (const update of updates) {
-      const { id, is_verified, verified_by } = update;
-
-      const { error } = await supabase
-        .from("registrations")
-        .update({ is_verified, verified_by })
-        .eq("id", id);
-
-      if (error) {
-        console.error(error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 400 });
-      }
+    if (error) {
+      console.error("Update error:", error);
+      return NextResponse.json({ success: false, message: error.message }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false, error: "Server Error" }, { status: 500 });
+    console.error("Server error:", err);
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }

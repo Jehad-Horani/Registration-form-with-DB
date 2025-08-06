@@ -88,10 +88,10 @@ export default function ResponsesPage() {
       prev.map((item) =>
         item.id === id
           ? {
-              ...item,
-              is_verified: !currentStatus,
-              verified_by: !currentStatus ? username : null,
-            }
+            ...item,
+            is_verified: !currentStatus,
+            verified_by: !currentStatus ? username : null,
+          }
           : item
       )
     );
@@ -235,6 +235,9 @@ export default function ResponsesPage() {
               <th className="border p-2">Membership</th>
               <th className="border p-2">Ticket</th>
               <th className="border p-2">Track</th>
+              <th className="border p-2">Bank Name</th>
+              <th className="border p-2">Account Name</th>
+              <th className="border p-2">Payment Proof</th>
               <th className="border p-2">Verified By</th>
               <th className="border p-2">Date</th>
               <th className="border p-2">Actions</th>
@@ -269,6 +272,17 @@ export default function ResponsesPage() {
                   <td className="border p-2">{r.membership_status}</td>
                   <td className="border p-2">{r.ticket_type}</td>
                   <td className="border p-2">{r.track}</td>
+                  <td className="border p-2">{r.bank_name || "-"}</td>
+                  <td className="border p-2">{r.account_name || "-"}</td>
+                  <td className="border p-2">
+                    {r.payment_proof ? (
+                      <a href={r.payment_proof} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                        View
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td className="border p-2">{verifiedBy}</td>
                   <td className="border p-2">{new Date(r.created_at).toLocaleDateString()}</td>
                   <td className="border p-2 space-x-2">

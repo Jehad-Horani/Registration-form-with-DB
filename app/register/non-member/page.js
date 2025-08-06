@@ -151,7 +151,7 @@ export default function NonMemberRegisterForm() {
                     <input type="checkbox" name="agree_media" onChange={handleChange} required /> I consent to photography/media use
                 </label>
 
-                <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-bold">
+                <button className="w-full cursor-pointer bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-bold">
                     🚀 Register Now
                 </button>
             </form>

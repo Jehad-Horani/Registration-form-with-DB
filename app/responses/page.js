@@ -270,8 +270,8 @@ export default function ResponsesPage() {
                   <td className="border p-2">{r.email}</td>
                   <td className="border p-2">{r.phone}</td>
                   <td className="border p-2">{r.institution || "-"}</td>
-                  <td className="border p-2">{r.ieee_number || "-"}</td>
                   <td className="border p-2">{r.membership_status}</td>
+                  <td className="border p-2">{r.ieee_number || "-"}</td>
                   <td className="border p-2">{r.ticket_type}</td>
                   <td className="border p-2">{r.track}</td>
                   <td className="border p-2">{r.bank_name || "-"}</td>
